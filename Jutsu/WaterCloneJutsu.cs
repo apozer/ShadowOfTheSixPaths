@@ -32,7 +32,7 @@ namespace Jutsu
             while (true)
             {
                 JutsuEntry.local.root.Update();
-                SpellWheelCheck(true);
+                SpellWheelCheck();
                 if (GetActivated())
                 {
                     if (!GetJutsuTimerActivated())
@@ -55,6 +55,7 @@ namespace Jutsu
                         creatureData.brainId = "HumanMedium";
                         creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2), 0, null, false, null, creature =>
                         {
+                            creature.OnDamageEvent += OnDamageEvent;
                            var ogScale = creature.gameObject.transform.localScale; // cache original scale
                             creature.gameObject.transform.localScale = new Vector3(creature.gameObject.transform.localScale.x, 0f, creature.gameObject.transform.localScale.z); //flatten creauture size
                             this.creature = creature;
@@ -130,7 +131,6 @@ namespace Jutsu
         IEnumerator CheckIsGrounded()
         {
             yield return new WaitUntil(() => this.creature.locomotion.isGrounded);
-            creature.OnDamageEvent += OnDamageEvent;
         }
         
         /*
@@ -142,23 +142,24 @@ namespace Jutsu
             {
                 Creature creature = collisioninstance.targetCollider.GetComponentInParent<Creature>(); //hit creature
                 GameManager.local.StartCoroutine(timeAfter(creature)); // async coroutine
-                hit = !hit; // invert for timeAfter method
             }
         }
 
         IEnumerator timeAfter(Creature creature)
         {
             yield return new WaitForSeconds(0.7f); // wait 0.7 seconds
-            VisualEffect vfx = JutsuEntry.local.waterVFX.GetComponentInChildren<VisualEffect>();
+            VisualEffect vfx = JutsuEntry.local?.waterVFX?.GetComponentInChildren<VisualEffect>().DeepCopyByExpressionTree();
             VisualEffect go = Object.Instantiate(vfx);
-            go.transform.position = creature.ragdoll.headPart.transform.position;
-            go.transform.position = new Vector3(go.transform.position.x, go.transform.position.y - creature.GetHeight(),
+            if(go) go.gameObject.transform.position = creature.ragdoll.headPart.transform.position;
+            if(go) go.gameObject.transform.position = new Vector3(go.transform.position.x, go.transform.position.y - creature.GetHeight(),
                 go.transform.position.z);
             GameObject tempSound = Object.Instantiate(JutsuEntry.local.sound2);
             tempSound.GetComponent<AudioSource>().Play();
             creatureSpawned = false;
             creature.Despawn();
             hit = !hit;
+            yield return new WaitForSeconds(3f);
+            Object.Destroy(vfx);
         }
     }
 }

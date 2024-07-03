@@ -61,6 +61,11 @@ namespace Jutsu
         public GameObject sound1;
         public GameObject sound2;
         public Material waterMaterial;
+        
+        //Shadow Clone
+        public GameObject shadowCloneVFX;
+        public GameObject shadowCloneSpawnSFX;
+        public GameObject shadowCloneDeathSFX;
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -86,8 +91,8 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YinRelease.SFX.ShadowPossession", go => { shadowSFX = go;}, "ShadowSFX");
             
             //Water Clone jutsu
-            /*Catalog.LoadAssetAsync<GameObject>(waterFallAddress, gameobject => { waterVFX = gameobject; },
-                "WaterFallEffect");*/
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.VFX.Waterfall", gameobject => { waterVFX = gameobject; },
+                "WaterFallEffect");
 
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.SFX.Spawn",
                 gameobject => { sound1 = gameobject; }, "WaterSFX1");
@@ -98,6 +103,15 @@ namespace Jutsu
             Catalog.LoadAssetAsync<Material>(waterMaterialAddress,
                 waterMaterial => { this.waterMaterial = waterMaterial; },
                 "WaterMaterial");
+            
+            
+            //Shadow Clone Jutsu data
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.VFX", obj => { shadowCloneVFX = obj; },
+                "ShadowCloneVFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Spawn", obj => { shadowCloneSpawnSFX = obj; },
+                "ShadowCloneSpawnSFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Death", obj => { shadowCloneDeathSFX = obj; },
+                "ShadowCloneDeathSFX");
             
             return base.LoadAddressableAssetsCoroutine();
         }
