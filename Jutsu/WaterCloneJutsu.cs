@@ -55,7 +55,8 @@ namespace Jutsu
                         creatureData.brainId = "HumanMedium";
                         creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2), 0, null, false, null, creature =>
                         {
-
+                           var ogScale = creature.gameObject.transform.localScale; // cache original scale
+                            creature.gameObject.transform.localScale = new Vector3(creature.gameObject.transform.localScale.x, 0f, creature.gameObject.transform.localScale.z); //flatten creauture size
                             this.creature = creature;
                             //GameManager.local.StartCoroutine(CheckIsGrounded());
                             GameObject temporary =
@@ -99,7 +100,7 @@ namespace Jutsu
                             }
 
                             //Only need one of this class type to be active
-                            creature.gameObject.AddComponent<WaterCloneSizing>().Setup(creature);
+                            creature.gameObject.AddComponent<WaterCloneSizing>().Setup(creature, ogScale);
                             SetActivated(false);
                         });
                     }

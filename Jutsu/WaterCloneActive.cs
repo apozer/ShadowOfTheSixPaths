@@ -75,8 +75,6 @@ namespace Jutsu
         
         private void Start()
         {
-            ogScale = creature.gameObject.transform.localScale; // cache original scale
-            creature.gameObject.transform.localScale = new Vector3(creature.gameObject.transform.localScale.x, height, creature.gameObject.transform.localScale.z); //flatten creauture size
             start = !start; // invert to start update code
         }
         void Update()
@@ -130,9 +128,10 @@ namespace Jutsu
                     }
             }
         }
-        public void Setup(Creature creature)
+        public void Setup(Creature creature, Vector3 scale)
         {
             this.creature = creature;
+            this.ogScale = scale;
         }
     }
 }

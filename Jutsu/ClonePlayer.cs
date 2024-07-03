@@ -42,21 +42,24 @@ namespace Jutsu
                         Debug.Log("Wardrobe: " + itemContent.data.displayName);
                         creature.equipment.EquipWardrobe(itemContent);
                     }
-
-                    if (itemContent.HasState<ContentStateHolder>())
+                }
+                List<Item> items = playerCreature.equipment.GetAllHolsteredItems();
+                List<(ItemData, Holder)> dataHolders = new List<(ItemData, Holder)>();
+                foreach (var item in items)
+                {
+                    dataHolders.Add((item.data, item.holder));
+                }
+                foreach (var (data, holder) in dataHolders)
+                {
+                    data.SpawnAsync(item =>
                     {
-                        Debug.Log("Holsterable: " + itemContent.data.displayName);
-                        itemContent.Spawn(item =>
+                        foreach (var creatureHolder in creature.holders)
                         {
-                            foreach (var holder in creature.holders)
-                            {
-                                if (holder.name != item.holder.name)
-                                    continue;
-                                holder.Snap(item);
-                            }
-                        });
-                    }
-
+                            if (creatureHolder.name != holder.name)
+                                continue;
+                            creatureHolder.Snap(item);
+                        }
+                    });
                 }
             }
             catch (Exception e)
