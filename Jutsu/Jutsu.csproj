@@ -89,6 +89,7 @@
     <ItemGroup>
         <Compile Include="BakeVFX.cs" />
         <Compile Include="Chidori.cs" />
+        <Compile Include="ClonePlayer.cs" />
         <Compile Include="CoroutineManager.cs" />
         <Compile Include="Despawn.cs" />
         <Compile Include="FlameFollow.cs" />
@@ -114,6 +115,7 @@
         <Compile Include="SubstitutionJutsu.cs" />
         <Compile Include="WaterCloneActive.cs" />
         <Compile Include="WaterCloneJutsu.cs" />
+        <Compile Include="WaterReleaseCast.cs" />
         <Compile Include="WaterSharkBombJutsu.cs" />
         <Compile Include="YinReleaseCast.cs" />
     </ItemGroup>

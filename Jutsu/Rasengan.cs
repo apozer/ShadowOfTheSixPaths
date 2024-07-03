@@ -35,7 +35,7 @@ namespace Jutsu
         {
             base.OnSkillLoaded(skillData, creature);
             rasenganData = Catalog.GetData<ItemData>("RasenganItem");
-            rasenganRun = GameManager.local.StartCoroutine(RunRasengan());
+            //rasenganRun = GameManager.local.StartCoroutine(RunRasengan());
             //root = Step.Start();
         }
 

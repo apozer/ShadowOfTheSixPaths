@@ -22,14 +22,13 @@ namespace Jutsu
         internal bool HandDistance(bool activated)
         {
             return Vector3.Distance(Player.local.handRight.ragdollHand.caster.transform.position,
-                Player.local.handLeft.ragdollHand.caster.transform.position) < 0.15f && !activated;
+                Player.local.handLeft.ragdollHand.caster.transform.position) < 0.1f && !activated;
         }
         
         internal bool HandDistance()
         {
-            
-            return Vector3.Distance(Player.local.handRight.ragdollHand.transform.position,
-                Player.local.handLeft.ragdollHand.transform.position) < 0.1f;
+            return Vector3.Distance(Player.local.handRight.ragdollHand.caster.transform.position,
+                Player.local.handLeft.ragdollHand.caster.transform.position) < 0.1f;
         }
 
         internal bool TigerSeal()

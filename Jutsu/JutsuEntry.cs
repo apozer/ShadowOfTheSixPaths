@@ -54,6 +54,13 @@ namespace Jutsu
         public GameObject monkeySealRightTransform;
         public GameObject monkeySealLeftTransform;
         public bool spellWheelDisabled = false;
+        
+        //Water Clone
+        public string waterMaterialAddress = "SOTSP.Jutsu.WaterRelease.VFX.WaterMaterial";
+        public GameObject waterVFX;
+        public GameObject sound1;
+        public GameObject sound2;
+        public Material waterMaterial;
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -77,8 +84,22 @@ namespace Jutsu
             //Shadow Possesion
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YinRelease.ShadowPossession", go => { shadow = go;}, "ShadowVFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YinRelease.SFX.ShadowPossession", go => { shadowSFX = go;}, "ShadowSFX");
-            return base.LoadAddressableAssetsCoroutine();
             
+            //Water Clone jutsu
+            /*Catalog.LoadAssetAsync<GameObject>(waterFallAddress, gameobject => { waterVFX = gameobject; },
+                "WaterFallEffect");*/
+
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.SFX.Spawn",
+                gameobject => { sound1 = gameobject; }, "WaterSFX1");
+
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.SFX.Splash", obj => { sound2 = obj; },
+                "SplashSFX");
+
+            Catalog.LoadAssetAsync<Material>(waterMaterialAddress,
+                waterMaterial => { this.waterMaterial = waterMaterial; },
+                "WaterMaterial");
+            
+            return base.LoadAddressableAssetsCoroutine();
         }
 
         async void AsyncSetup()

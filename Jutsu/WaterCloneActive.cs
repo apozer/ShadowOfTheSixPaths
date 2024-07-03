@@ -126,53 +126,13 @@ namespace Jutsu
                             }
                             reaction.lastHitSource = selected;
                         }
-                        SetCreatureEquipment(creature); // Sets gear to players gear
+                        ClonePlayer.SetCreatureEquipment(creature); // Sets gear to players gear
                     }
             }
         }
         public void Setup(Creature creature)
         {
             this.creature = creature;
-        }
-        private static void SetCreatureEquipment(Creature creature)
-        {
-            Creature playerCreature = Player.currentCreature;
-            
-            if(playerCreature == null) return;
-            
-            Container playerContainer = playerCreature.container;
-            
-            if (playerContainer == null || playerContainer.contents == null) return;
-            
-            try
-            {
-                foreach (ContainerContent content in playerContainer.contents)
-                {
-                    //add the content to the creatures container
-                    creature.container.contents.Add(content);
-                    //check if its a wardrobe item and equip it
-                    /*if (content..TryGetModule(out ItemModuleWardrobe _))
-                    {
-                        creature.equipment.EquipWardrobe(content);
-                    }*/
-
-                    //check if its a holder item and spawn and snap it
-                    /*if (content.TryGetState(out ContentStateHolder state))
-                    {
-                        content.Spawn(item => {
-                            foreach (Holder holder in creature.holders)
-                            {
-                                if (holder.name != state.holderName) continue;
-                                holder.Snap(item, true, true);
-                            }
-                        });
-                    }*/
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Something went wrong when setting the creatures equipment {e}");
-            }
         }
     }
 }

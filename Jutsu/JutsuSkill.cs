@@ -9,11 +9,12 @@ namespace Jutsu
     {
         private SpellCaster casterLeft;
         private SpellCaster casterRight;
-        private string spellInstanceId;
+        private string spellInstanceId = "";
         private bool jutsuActivated;
         private bool jutsuTimerActivated;
         private Seals seals;
         private Coroutine activeJutsuCoroutine;
+        private Coroutine activeJutsuTimerCoroutine;
 
         public void SetActivated(bool state)
         {
@@ -56,6 +57,12 @@ namespace Jutsu
         {
             return this.jutsuTimerActivated;
         }
+
+        public void SetJutsuTimerActivatedCoroutine(Coroutine coroutine)
+        {
+            this.activeJutsuTimerCoroutine = coroutine;
+        }
+        
         
         
 
@@ -66,7 +73,6 @@ namespace Jutsu
             GameManager.local.StartCoroutine(WaitForPlayer());
             jutsuActivated = false;
             jutsuTimerActivated = false;
-            activeJutsuCoroutine = GameManager.local.StartCoroutine(JutsuStart());
 
         }
 
@@ -77,6 +83,7 @@ namespace Jutsu
             this.casterLeft = Player.local.handLeft.ragdollHand.caster;
             this.casterRight = Player.local.handRight.ragdollHand.caster;
             CustomStartData();
+            activeJutsuCoroutine = GameManager.local.StartCoroutine(JutsuStart());
         }
         
         public override void OnSkillUnloaded(SkillData skillData, Creature creature)
@@ -93,30 +100,59 @@ namespace Jutsu
         internal IEnumerator JutsuActive()
         {
             yield return new WaitForSeconds(JutsuEntry.local.jutsuActiveTime);
+            Debug.Log("Jutsu Timer ended");
             SetActivated(false);
             SetJutsuTimerActivated(false);
+            Debug.Log(JutsuEntry.local.spellWheelDisabled);
             SpellWheelReset();
         }
 
-        internal void SpellWheelCheck()
+        internal void StopJutsuActiveTimer()
         {
-            if(GetSeals().HandDistance())
+            if (this.activeJutsuTimerCoroutine != null)
             {
-                if (!JutsuEntry.local.spellWheelDisabled)
+                GameManager.local.StopCoroutine(this.activeJutsuTimerCoroutine);
+            }
+        }
+
+        internal void SpellWheelCheck(bool ignoreReset = false)
+        {
+            if (GetSeals().HandDistance())
+            {
+                if (CheckSpellType())
                 {
-                    GetSpellCasterLeft().DisableSpellWheel(this);
-                    GetSpellCasterRight().DisableSpellWheel(this);
-                    JutsuEntry.local.spellWheelDisabled = true;
+                    if (!JutsuEntry.local.spellWheelDisabled)
+                    {
+                        GetSpellCasterLeft().DisableSpellWheel(this);
+                        GetSpellCasterRight().DisableSpellWheel(this);
+                        JutsuEntry.local.spellWheelDisabled = true;
+                    }
                 }
             }
             else
             {
-                if (JutsuEntry.local.spellWheelDisabled)
+                if (CheckSpellType() && !GetActivated())
                 {
-                    JutsuEntry.local.root.Reset();
-                    GetSpellCasterLeft().AllowSpellWheel(this);
-                    GetSpellCasterRight().AllowSpellWheel(this);
-                    JutsuEntry.local.spellWheelDisabled = false;
+                    if (ignoreReset)
+                    {
+                        if (JutsuEntry.local.spellWheelDisabled)
+                        {
+                            GetSpellCasterLeft().AllowSpellWheel(this);
+                            GetSpellCasterRight().AllowSpellWheel(this);
+                            JutsuEntry.local.spellWheelDisabled = false;
+                        }
+
+                    }
+                    else
+                    {
+                        if (JutsuEntry.local.spellWheelDisabled)
+                        {
+                            JutsuEntry.local.root.Reset();
+                            GetSpellCasterLeft().AllowSpellWheel(this);
+                            GetSpellCasterRight().AllowSpellWheel(this);
+                            JutsuEntry.local.spellWheelDisabled = false;
+                        }
+                    }
                 }
             }
         }
@@ -137,8 +173,8 @@ namespace Jutsu
         }
         internal bool CheckSpellType()
         {
-            return (GetSpellCasterLeft().spellInstance != null && GetSpellCasterLeft().spellInstance.id.Equals(this.spellInstanceId)) ||
-                   (GetSpellCasterLeft().spellInstance != null && GetSpellCasterRight().spellInstance.id.Equals(this.spellInstanceId));
+            return this.spellInstanceId != "" && ((GetSpellCasterLeft().spellInstance != null && GetSpellCasterLeft().spellInstance.id.Equals(this.spellInstanceId)) ||
+                   (GetSpellCasterRight().spellInstance != null && GetSpellCasterRight().spellInstance.id.Equals(this.spellInstanceId)));
         }
     }
 }
