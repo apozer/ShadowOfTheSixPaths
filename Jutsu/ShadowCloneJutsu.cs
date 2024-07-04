@@ -54,7 +54,7 @@ namespace Jutsu
                                 .data.Clone(); //Clone data object, so the Player creature data isnt affected. Without a deep copy, it will update the player to act like an npc
                         creatureData.containerID = "Empty";
                         creatureData.brainId = "HumanMedium";
-                        creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2), 0, null, false, null, creature =>
+                        creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2.5f), Player.local.creature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                         {
                             this.creature = creature;
                             creature.OnDamageEvent += OnDamageEvent;
@@ -104,11 +104,10 @@ namespace Jutsu
 
                 else
                 {
-                    if (creatureSpawned)
+                    if (this.creature && GetJutsuTimerActivated())
                     {
-                        SetJutsuTimerActivated(true);
+                        SetJutsuTimerActivated(false);
                         StopJutsuActiveTimer();
-                        SpellWheelReset();
                     }
                 }
 
@@ -117,7 +116,7 @@ namespace Jutsu
         }
         private void OnDamageEvent(CollisionInstance collisioninstance, EventTime eventtime)
         {
-            if (!hit && !damageStarted)
+            if (!damageStarted)
             {
                 damageStarted = true;
                 GameManager.local.StartCoroutine(timeAfter(creature)); // async coroutine
@@ -136,7 +135,7 @@ namespace Jutsu
                 if (refSound) refSound.transform.position = this.creature.ragdoll.targetPart.transform.position;
                 creatureSpawned = false;
                 creature.Despawn();
-                hit = !hit;
+                SetActivated(false);
                 damageStarted = false;
         }
     }
