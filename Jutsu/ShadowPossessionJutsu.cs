@@ -79,7 +79,7 @@ namespace Jutsu
                 JutsuEntry.local.root.Update();
                 if(JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset();
                 
-                SpellWheelCheck();
+                SpellWheelCheck(GetActivated());
                 
                 if (!instantiated && GetActivated())
                 {

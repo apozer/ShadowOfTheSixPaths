@@ -55,15 +55,16 @@ namespace Jutsu
             while (true)
             {
                 JutsuEntry.local.root.Update();
-                if (JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset(); 
-                SpellWheelCheck();
+                if (JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset();
+                bool value;
+                SpellWheelCheck(GetActivated());
                 
                 if (GetActivated())
                 {
                     if (!GetJutsuTimerActivated())
                     {
                         SetJutsuTimerActivated(true);
-                        GameManager.local.StartCoroutine(JutsuActive());
+                        SetJutsuTimerActivatedCoroutine(GameManager.local.StartCoroutine(JutsuActive()));
                     }
                     if (!chidori && !chidoriStarted)
                     {

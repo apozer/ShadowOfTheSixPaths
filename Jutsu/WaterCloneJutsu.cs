@@ -9,102 +9,130 @@ using UnityEngine.VFX;
 
 namespace Jutsu
 {
-    public class WaterCloneJutsu : SpellCastProjectile
+    public class WaterCloneJutsu : JutsuSkill
     {
-        public string waterMaterialAddress = "apoz123.WaterStyle.Material.WaterMaterial";
-        public string waterFallAddress = "apoz123Jutsu.WaterStyleJutsu.WaterClone.Effect.WaterFall";
         private CreatureData creatureData;
-        private Material material;
-        private GameObject waterVFX;
         private Material[] originalMaterials;
-        private GameObject sound1;
-        private GameObject sound2;
-
         private bool hit = false;
+        private readonly string spellId = "WaterInit";
+        private bool creatureSpawned = false;
+        private Creature creature;
 
-        /*
-         * Used to load all assets for this spell whenever the Catalog is refereshed.
-         */
-        public override IEnumerator OnCatalogRefreshCoroutine()
+        internal override void CustomStartData()
         {
-            Catalog.LoadAssetAsync<GameObject>(waterFallAddress, gameobject => { waterVFX = gameobject; },
-                "WaterFallEffect");
-
-            Catalog.LoadAssetAsync<GameObject>("apoz123.WaterStyle.WaterClone.SFX.Spawning",
-                gameobject => { sound1 = gameobject; }, "WaterSFX1");
-
-            Catalog.LoadAssetAsync<GameObject>("apoz123.WaterStyle.WaterClone.SFX.Splash1", obj => { sound2 = obj; },
-                "SplashSFX");
-
-            yield return Catalog.LoadAssetCoroutine<Material>(waterMaterialAddress,
-                waterMaterial => { material = waterMaterial; },
-                "WaterMaterial");
+            SetSpellInstanceID(spellId);
+            var activate = JutsuEntry.local.root.Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType()).Do(() => JutsuEntry.local.root.Reset());
+            activate
+                .Then(() => !waitALittleBit && GetSeals().TigerSeal())
+                .Do(() => SetActivated(true));
         }
 
-        /*
-         * Functionality when projectile hits the ground, or other objects.
-         */
-        protected override void OnProjectileCollision(ItemMagicProjectile projectile,
-            CollisionInstance collisionInstance)
+        internal override IEnumerator JutsuStart()
         {
-            base.OnProjectileCollision(projectile, collisionInstance);
-            Vector3 position = collisionInstance.contactPoint;
-
-            /*Set all Creature data beforehand that will not cause bug issues*/
-            creatureData =
-                Player.currentCreature
-                    .data; //Clone data object, so the Player creature data isnt affected. Without a deep copy, it will update the player to act like an npc
-            creatureData.containerID = "Empty";
-            creatureData.brainId = "HumanMedium";
-
-            /*spawn logic*/
-            creatureData.SpawnAsync(position, 0, null, false, null, creature =>
+            while (true)
             {
-                GameObject temporary = GameObject.Instantiate(sound1); //Instantiate sfx object
-                temporary.transform.position = creature.transform.position; // update position (Spatial audio)
-                temporary.GetComponent<AudioSource>().Play(); // Play sfx
-
-                creature.OnDamageEvent += OnDamageEvent;
-
-                creature.brain.SetState(Brain.State
-                    .Idle); // Prevents brain from acting on ragdoll parts, this can be buggy if it does.
-                creature.ragdoll.SetState(Ragdoll.State
-                    .Disabled); // Disables the mesh, so it cannot be affected by physics.
-
-                SetCreatureLooks(creature);
-
-                /*Loop over all renderers to update materials*/
-                foreach (Creature.RendererData data in creature.renderers)
+                JutsuEntry.local.root.Update();
+                SpellWheelCheck();
+                if (GetActivated())
                 {
-
-                    if (data.renderer)
+                    if (!GetJutsuTimerActivated())
                     {
-                        Material temp = material.DeepCopyByExpressionTree(); // Deep copy of material
-                        Material[] materials =
-                            data.renderer.materials
-                                .DeepCopyByExpressionTree(); // original materials on creature renderer
-                        Material[] tempArray = new Material[materials.Length]; // Water material array
-                        for (int i = 0; i < tempArray.Length; i++)
+                        Debug.Log("Started timer and activated true");
+                        SetJutsuTimerActivated(true);
+                        SetJutsuTimerActivatedCoroutine(GameManager.local.StartCoroutine(JutsuActive()));
+                    }
+                    if (!creatureSpawned)
+                    {
+                        creatureSpawned = true;
+                        var playerPos = Player.currentCreature.transform.position;
+                        Vector3 position = new Vector3(Random.Range(playerPos.x - 1, playerPos.x + 1), playerPos.y,
+                            Random.Range(playerPos.z - 1, playerPos.z + 1));
+
+                        creatureData =
+                            (CreatureData) Player.currentCreature
+                                .data.Clone(); //Clone data object, so the Player creature data isnt affected. Without a deep copy, it will update the player to act like an npc
+                        creatureData.containerID = "Empty";
+                        creatureData.brainId = "HumanMedium";
+                        creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2), 0, null, false, null, creature =>
                         {
-                            tempArray[i] = temp.DeepCopyByExpressionTree();
-                        }
+                            creature.OnDamageEvent += OnDamageEvent;
+                           var ogScale = creature.gameObject.transform.localScale; // cache original scale
+                            creature.gameObject.transform.localScale = new Vector3(creature.gameObject.transform.localScale.x, 0f, creature.gameObject.transform.localScale.z); //flatten creauture size
+                            this.creature = creature;
+                            //GameManager.local.StartCoroutine(CheckIsGrounded());
+                            GameObject temporary =
+                                GameObject.Instantiate(JutsuEntry.local.sound1); //Instantiate sfx object
+                            temporary.transform.position =
+                                creature.transform.position; // update position (Spatial audio)
+                            temporary.GetComponent<AudioSource>().Play(); // Play sfx
 
-                        data.renderer.materials =
-                            tempArray
-                                .DeepCopyByExpressionTree(); // set renderer material array to deep copy of the water materials array
+                            creature.brain.SetState(Brain.State
+                                .Idle); // Prevents brain from acting on ragdoll parts, this can be buggy if it does.
+                            creature.ragdoll.SetState(Ragdoll.State
+                                .Disabled); // Disables the mesh, so it cannot be affected by physics.
 
-                        /*Add transitioning class to creature*/
-                        creature.gameObject.AddComponent<WaterCloneActive>().Setup(data.renderer, materials,
-                            data.renderer.materials.DeepCopyByExpressionTree(), creature);
+                            ClonePlayer.SetCreatureLooks(creature);
+
+                            /*Loop over all renderers to update materials*/
+                            foreach (Creature.RendererData data in creature.renderers)
+                            {
+                                if (data.renderer)
+                                {
+                                    Material temp =
+                                        JutsuEntry.local.waterMaterial
+                                            .DeepCopyByExpressionTree(); // Deep copy of material
+                                    Material[] materials =
+                                        data.renderer.materials
+                                            .DeepCopyByExpressionTree(); // original materials on creature renderer
+                                    Material[] tempArray = new Material[materials.Length]; // Water material array
+                                    for (int i = 0; i < tempArray.Length; i++)
+                                    {
+                                        tempArray[i] = temp.DeepCopyByExpressionTree();
+                                    }
+
+                                    data.renderer.materials =
+                                        tempArray
+                                            .DeepCopyByExpressionTree(); // set renderer material array to deep copy of the water materials array
+
+                                    /*Add transitioning class to creature*/
+                                    creature.gameObject.AddComponent<WaterCloneActive>().Setup(data.renderer, materials,
+                                        data.renderer.materials.DeepCopyByExpressionTree(), creature);
+                                }
+                            }
+
+                            //Only need one of this class type to be active
+                            creature.gameObject.AddComponent<WaterCloneSizing>().Setup(creature, ogScale);
+                            SetActivated(false);
+                        });
                     }
                 }
-
-                //Only need one of this class type to be active
-                creature.gameObject.AddComponent<WaterCloneSizing>().Setup(creature);
-            });
-
+                else
+                {
+                    StopJutsuActiveTimer();
+                    if (!waitALittleBit && creatureSpawned)
+                    {
+                        GameManager.local.StartCoroutine(WaitALittleBit());
+                    }
+                }
+                yield return null;
+            }
         }
 
+        private bool waitALittleBit = false;
+        IEnumerator WaitALittleBit()
+        {
+            Debug.Log("waiting a few");
+            waitALittleBit = true;
+            yield return new WaitForSeconds(3f);
+            creatureSpawned = false;
+            SpellWheelReset();
+            waitALittleBit = false;
+        }
+        IEnumerator CheckIsGrounded()
+        {
+            yield return new WaitUntil(() => this.creature.locomotion.isGrounded);
+        }
+        
         /*
          * On damage event when creature is hit
          */
@@ -114,82 +142,24 @@ namespace Jutsu
             {
                 Creature creature = collisioninstance.targetCollider.GetComponentInParent<Creature>(); //hit creature
                 GameManager.local.StartCoroutine(timeAfter(creature)); // async coroutine
-                hit = !hit; // invert for timeAfter method
             }
         }
 
         IEnumerator timeAfter(Creature creature)
         {
             yield return new WaitForSeconds(0.7f); // wait 0.7 seconds
-            VisualEffect vfx = this.waterVFX.GetComponentInChildren<VisualEffect>();
+            VisualEffect vfx = JutsuEntry.local?.waterVFX?.GetComponentInChildren<VisualEffect>().DeepCopyByExpressionTree();
             VisualEffect go = Object.Instantiate(vfx);
-            go.transform.position = creature.ragdoll.headPart.transform.position;
-            go.transform.position = new Vector3(go.transform.position.x, go.transform.position.y - creature.GetHeight(),
+            if(go) go.gameObject.transform.position = creature.ragdoll.headPart.transform.position;
+            if(go) go.gameObject.transform.position = new Vector3(go.transform.position.x, go.transform.position.y - creature.GetHeight(),
                 go.transform.position.z);
-            GameObject tempSound = Object.Instantiate(sound2);
+            GameObject tempSound = Object.Instantiate(JutsuEntry.local.sound2);
             tempSound.GetComponent<AudioSource>().Play();
+            creatureSpawned = false;
             creature.Despawn();
             hit = !hit;
+            yield return new WaitForSeconds(3f);
+            Object.Destroy(vfx);
         }
-
-        private static void SetCreatureEquipment(Creature creature)
-        {
-            //check the creature exists tho
-            Creature playerCreature = Player.currentCreature;
-            if (playerCreature == null) return;
-            //check the containers not empty/null
-            Container playerContainer = playerCreature.container;
-            if (playerContainer == null || playerContainer.contents == null) return;
-
-            //try catch
-            /*try
-            {
-                foreach (ContainerData.Content content in playerContainer.contents)
-                {
-                    //add the content to the creatures container
-                    creature.container.contents.Add(content);
-                    //check if its a wardrobe item and equip it
-                    if (content.itemData.TryGetModule(out ItemModuleWardrobe _))
-                    {
-                        creature.equipment.EquipWardrobe(content);
-                    }
-
-                    //check if its a holder item and spawn and snap it
-                    if (content.TryGetState(out ContentStateHolder state))
-                    {
-                        content.Spawn(item => {
-                            foreach (Holder holder in creature.holders)
-                            {
-                                if (holder.name != state.holderName) continue;
-                                holder.Snap(item, true, true);
-                            }
-                        });
-                    }
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Something went wrong when setting the creatures equipment {e}");
-            }
-            */
-        }
-
-        private static void SetCreatureLooks(Creature creature)
-        {
-            //Used because SetHeight causes some issues when trying to hard set a position with SpellCastProjectile
-            /*try
-            {
-                creature.SetHeight(Player.currentCreature.GetHeight());
-                creature.SetColor(Player.characterData.hairColor, Creature.ColorModifier.Hair);
-                creature.SetColor(Player.characterData.hairSecondaryColor, Creature.ColorModifier.HairSecondary);
-                creature.SetColor(Player.characterData.hairSpecularColor, Creature.ColorModifier.HairSpecular);
-                creature.SetColor(Player.characterData.skinColor, Creature.ColorModifier.Skin);
-                creature.SetColor(Player.characterData.eyesIrisColor, Creature.ColorModifier.EyesIris);
-                creature.SetColor(Player.characterData.eyesScleraColor, Creature.ColorModifier.EyesSclera);
-            }
-            catch (System.Exception e)
-            {*/
-            Debug.LogError($"Something went wrong when setting the creatures height and colours");//e}");
-    }
     }
 }
