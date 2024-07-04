@@ -21,7 +21,7 @@ namespace Jutsu
         {
             damageStarted = false;
             SetSpellInstanceID(spellInstanceId);
-            var activated = JutsuEntry.local.root.Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType()).Do(() => JutsuEntry.local.root.Reset());
+            var activated = GetRoot().Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType());
             activated.Then(GetSeals().RamSeal)
                 .Then(GetSeals().SnakeSeal)
                 .Then(GetSeals().TigerSeal)
@@ -32,7 +32,7 @@ namespace Jutsu
         {
             while (true)
             {
-                JutsuEntry.local.root.Update();
+                GetRoot().Update();
                 SpellWheelCheck(true);
                 if (GetActivated())
                 {
@@ -58,6 +58,7 @@ namespace Jutsu
                         {
                             this.creature = creature;
                             creature.OnDamageEvent += OnDamageEvent;
+                            creature.OnDespawnEvent += OnDespawnEvent;
                             vfx = JutsuEntry.local.shadowCloneVFX.DeepCopyByExpressionTree();
                             vfx.transform.position = creature.ragdoll.targetPart.transform.position;
                             Object.Instantiate(vfx);
@@ -107,13 +108,20 @@ namespace Jutsu
                     if (this.creature && GetJutsuTimerActivated())
                     {
                         SetJutsuTimerActivated(false);
-                        StopJutsuActiveTimer();
+                        StopJutsuActiveTimer(true);
                     }
                 }
 
                 yield return null;
             }
         }
+
+        private void OnDespawnEvent(EventTime eventtime)
+        {
+            SetJutsuTimerActivated(false);
+            StopJutsuActiveTimer(true);
+        }
+
         private void OnDamageEvent(CollisionInstance collisioninstance, EventTime eventtime)
         {
             if (!damageStarted)

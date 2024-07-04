@@ -80,9 +80,9 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.start", go => { chidoriStartSFX = go;}, "ChidoriStartSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.loop",
                 go => { chidoriLoopSFX = go;}, "ChidoriLoopSFX");
-            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Start", go => { chidoriStartSFX = go;}, "ChidoriStartSFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Start", go => { rasenganStartSFX = go;}, "RasenganStartSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Loop",
-                go => { chidoriLoopSFX = go;}, "ChidoriLoopSFX");
+                go => { rasenganLoopSFX = go;}, "RasenganLoopSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.HandSigns.MonkeyLeft", go => { monkeySealLeftTransform = go;}, "MonkeySealLeftTransform");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.HandSigns.MonkeyRight", go => { monkeySealRightTransform = go;}, "MonkeySealRightTransform");
             
@@ -144,6 +144,8 @@ namespace Jutsu
 
         public Step root;
         public float jutsuActiveTime = 10f;
+        public int multiShadowCloneMax = 10;
+        public Dictionary<JutsuSkill, bool> canBeActiveJutsu = new Dictionary<JutsuSkill, bool>();
         public void SequenceManagement()
         {
             root = Step.Start();

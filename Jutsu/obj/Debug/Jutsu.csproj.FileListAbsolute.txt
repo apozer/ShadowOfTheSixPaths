@@ -58,7 +58,6 @@ C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Unity.XR.Oculus.dll
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.InputLegacyModule.dll
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Unity.Collections.dll
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.ImageConversionModule.dll
-C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\VLB.dll
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Unity.Mathematics.dll
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Newtonsoft.Json.UnityConverters.dll
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.SubsystemsModule.dll
@@ -205,7 +204,6 @@ C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Newtonsoft.Json.UnityConverte
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.SubsystemsModule.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.TerrainPhysicsModule.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.VehiclesModule.pdb
-C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\VLB.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\BetterStreamingAssets.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Unity.Burst.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\UnityEngine.UnityWebRequestAssetBundleModule.pdb
@@ -255,3 +253,15 @@ C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Shadowood.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\MirrorsAndReflections.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ScreenSpaceDistanceField.pdb
 C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\DynamicAddPass.pdb
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderRoad.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderRoad.Manikin.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderRoad.MaterialInstance.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderSpline.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderRoad.Reveal.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\RainyReignGames.MeshUtilities.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\RainyReignGames.Dismemberment.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderRoad.Reflection.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\ThunderRoad.PointCache.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\RaycastTexture.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\RainyReignGames.Collections.xml
+C:\Users\braxt\RiderProjects\Jutsu\Jutsu\bin\Debug\Shadowood.xml

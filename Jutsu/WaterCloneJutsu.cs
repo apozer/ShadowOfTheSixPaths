@@ -21,7 +21,7 @@ namespace Jutsu
         internal override void CustomStartData()
         {
             SetSpellInstanceID(spellId);
-            var activate = JutsuEntry.local.root.Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType()).Do(() => JutsuEntry.local.root.Reset());
+            var activate = GetRoot().Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType());
             activate
                 .Then(() => !waitALittleBit && GetSeals().TigerSeal())
                 .Do(() => SetActivated(true));
@@ -31,7 +31,7 @@ namespace Jutsu
         {
             while (true)
             {
-                JutsuEntry.local.root.Update();
+                GetRoot().Update();
                 SpellWheelCheck();
                 if (GetActivated())
                 {

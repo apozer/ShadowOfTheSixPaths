@@ -15,7 +15,12 @@ namespace Jutsu
         private Seals seals;
         private Coroutine activeJutsuCoroutine;
         private Coroutine activeJutsuTimerCoroutine;
+        private Step root;
 
+        public Step GetRoot()
+        {
+            return this.root;
+        }
         public void SetActivated(bool state)
         {
             this.jutsuActivated = state;
@@ -69,6 +74,7 @@ namespace Jutsu
         public override void OnSkillLoaded(SkillData skillData, Creature creature)
         {
             base.OnSkillLoaded(skillData, creature);
+            this.root = Step.Start();
             seals = new Seals();
             GameManager.local.StartCoroutine(WaitForPlayer());
             jutsuActivated = false;
@@ -108,11 +114,12 @@ namespace Jutsu
             SpellWheelReset();
         }
 
-        internal void StopJutsuActiveTimer()
+        internal void StopJutsuActiveTimer(bool resetRoot = false)
         {
             if (this.activeJutsuTimerCoroutine != null)
             {
                 GameManager.local.StopCoroutine(this.activeJutsuTimerCoroutine);
+                if(resetRoot) root.Reset();
             }
         }
 
@@ -148,7 +155,7 @@ namespace Jutsu
                     {
                         if (JutsuEntry.local.spellWheelDisabled)
                         {
-                            JutsuEntry.local.root.Reset();
+                            this.root.Reset();
                             GetSpellCasterLeft().AllowSpellWheel(this);
                             GetSpellCasterRight().AllowSpellWheel(this);
                             JutsuEntry.local.spellWheelDisabled = false;
@@ -161,7 +168,7 @@ namespace Jutsu
         {
             if (JutsuEntry.local.spellWheelDisabled)
             {
-                JutsuEntry.local.root.Reset();
+                this.root.Reset();
                 GetSpellCasterLeft().AllowSpellWheel(this);
                 GetSpellCasterRight().AllowSpellWheel(this);
                 JutsuEntry.local.spellWheelDisabled = false;

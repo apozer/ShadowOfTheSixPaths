@@ -31,13 +31,13 @@ namespace Jutsu
         public AudioSource rasenganLoopSFX;
 
         public bool startSoundPlayed = false;
-        public override void OnSkillLoaded(SkillData skillData, Creature creature)
+        /*public override void OnSkillLoaded(SkillData skillData, Creature creature)
         {
             base.OnSkillLoaded(skillData, creature);
             rasenganData = Catalog.GetData<ItemData>("RasenganItem");
             //rasenganRun = GameManager.local.StartCoroutine(RunRasengan());
             //root = Step.Start();
-        }
+        }*/
 
 
         bool DistanceCheck()
