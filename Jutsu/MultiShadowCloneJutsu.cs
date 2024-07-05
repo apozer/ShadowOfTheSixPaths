@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Jutsu
@@ -7,7 +8,7 @@ namespace Jutsu
     using ThunderRoad;
     public class MultiShadowCloneJutsu : JutsuSkill
     {
-          private GameObject vfx;
+        private GameObject vfx;
         private GameObject sfxSpawn;
         private GameObject sfxDeath;
         private string spellInstanceId = "YangInit";
@@ -17,9 +18,13 @@ namespace Jutsu
         private bool hit = false;
         private Dictionary<Creature, bool> creatures = new Dictionary<Creature, bool>();
         private int currentMax = 0;
+        private static System.Random random = new System.Random();
+
+        private GameObject jutsuVFX;
 
         internal override void CustomStartData()
         {
+            jutsuVFX = JutsuEntry.local.shadowCloneVFX.DeepCopyByExpressionTree();
             damageStarted = false;
             SetSpellInstanceID(spellInstanceId);
             var activated = GetRoot().Then(() =>
@@ -36,29 +41,41 @@ namespace Jutsu
         internal override void CustomEndData()
         {
             creatures = new Dictionary<Creature, bool>();
-            
+            currentMax = 0;
+
         }
 
+        private int previousValue = 0;
+        int GetRandomValue()
+        {
+            var current = random.Next(-3, 3);
+            if (previousValue == current)
+            {
+                return GetRandomValue();
+            }
+            previousValue = current;
+
+            return current;
+        }
         internal override IEnumerator JutsuStart()
         {
             while (true)
             {
                 GetRoot().Update();
-                SpellWheelCheck(true);
+                SpellWheelCheck(true, !GetActivated());
                 if (GetActivated())
                 {
                     if (!GetJutsuTimerActivated())
                     {
                         Debug.Log("Started timer and activated true");
                         SetJutsuTimerActivated(true);
-                        SetJutsuTimerActivatedCoroutine(GameManager.local.StartCoroutine(JutsuActive()));
                     }
                      if (!startedSpawningCreatures && creatures.Count == 0)
                     {
                         startedSpawningCreatures = true;
                         var playerPos = Player.currentCreature.transform.position;
-                        Vector3 position = new Vector3(Random.Range(playerPos.x - 2, playerPos.x + 2), playerPos.y,
-                            Random.Range(playerPos.z - 2, playerPos.z + 2));
+                        Vector3 position = new Vector3(playerPos.x + (Random.Range(-40,40) / 20) , playerPos.y,
+                            playerPos.z + (Random.Range(-40,40) / 20));
 
                         creatureData =
                             (CreatureData) Player.currentCreature
@@ -67,14 +84,11 @@ namespace Jutsu
                         creatureData.brainId = "HumanMedium";
                         for (int i = Random.Range(0, 6); i < JutsuEntry.local.multiShadowCloneMax; i++)
                         {
-                            yield return new WaitForSeconds(0.5f);
+                            yield return new WaitForSeconds(0.3f);
                             creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(position),
                                 Player.local.creature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                                 {
-                                    if (currentMax == 0)
-                                    {
-                                        currentMax = JutsuEntry.local.multiShadowCloneMax - i;
-                                    }
+                                    GameManager.local.StartCoroutine(ShadowCloneTimer(creature));
                                     creatures.Add(creature, false);
                                     creature.OnDamageEvent += OnDamageEvent;
                                     vfx = JutsuEntry.local.shadowCloneVFX.DeepCopyByExpressionTree();
@@ -124,54 +138,69 @@ namespace Jutsu
                                     ClonePlayer.SetCreatureEquipment(
                                         creature); //Set the creature's equipment to match player
                                 });
-                            
-                            if(i == JutsuEntry.local.multiShadowCloneMax - 1) SetActivated(false);
+
+                            if (i == JutsuEntry.local.multiShadowCloneMax - 1)
+                            {
+                                SetActivated(false);
+                            }
                         }
                     }
                 }
 
                 else
                 {
-                    if (creatures.Count == currentMax - 1 && GetJutsuTimerActivated())
+                    if (prevCount != creatures.Count)
                     {
+                        Debug.Log("Creature count: " + creatures.Count);
+                        prevCount = creatures.Count;
+                    }
+                    if (creatures.Count <= 0 && GetJutsuTimerActivated())
+                    {
+                        Debug.Log("Hit creature count less than or equal to");
                         SetJutsuTimerActivated(false);
-                        StopJutsuActiveTimer(true);
+                        SpellWheelReset();
+                        startedSpawningCreatures = false;
                     }
                 }
 
                 yield return null;
             }
         }
+
+        private int prevCount = 0;
+        IEnumerator ShadowCloneTimer(Creature creature)
+        {
+            yield return new WaitForSeconds(19.3f);
+            if(creature) GameManager.local.StartCoroutine(timeAfter(creature, true));
+        }
         private void OnDamageEvent(CollisionInstance collisioninstance, EventTime eventtime)
         {
-            var local = collisioninstance.targetCollider.GetComponentInParent<Creature>();
-            var damaged = true;
-            if (creatures[local] != null)
+            bool damaged = true;
+            var local = collisioninstance?.targetCollider?.GetComponentInParent<Creature>() ?? null;
+            if (local)
             {
-                damaged = creatures[local];
-            }
-
-            if (!damaged)
-            {
-                creatures[local] = true;
-                GameManager.local.StartCoroutine(timeAfter(local)); // async coroutine
+                if (creatures.ContainsKey(local))
+                {
+                    if (creatures[local] == true) return;
+                    creatures[local] = true;
+                    GameManager.local.StartCoroutine(timeAfter(local)); // async coroutine
+                }
             }
         }
 
         private bool damageStarted = false;
-        IEnumerator timeAfter(Creature creature)
+        IEnumerator timeAfter(Creature creature, bool despawning = false)
         {
-                yield return new WaitForSeconds(0.7f); // wait 0.7 seconds
-                var vfxTimeAfter = JutsuEntry.local.shadowCloneVFX;
-                vfxTimeAfter.transform.position = creature.ragdoll.targetPart.transform.position;
-                Object.Instantiate(vfxTimeAfter);
-                GameObject tempSound = JutsuEntry.local?.shadowCloneDeathSFX;
-                var refSound = Object.Instantiate(tempSound);
-                if (refSound) refSound.transform.position = creature.ragdoll.targetPart.transform.position;
-                startedSpawningCreatures = false;
-                creatures.Remove(creature);
-                creature.Despawn();
-                SetActivated(false);
+            yield return new WaitForSeconds(0.7f); // wait 0.7 seconds
+            var vfxTimeAfter = jutsuVFX.DeepCopyByExpressionTree();
+            vfxTimeAfter.transform.position = creature.ragdoll.targetPart.transform.position;
+            Object.Instantiate(vfxTimeAfter);
+            GameObject tempSound = JutsuEntry.local?.shadowCloneDeathSFX;
+            var refSound = Object.Instantiate(tempSound);
+            if (refSound) refSound.transform.position = creature.ragdoll.targetPart.transform.position;
+            creatures.Remove(creature);
+            creature.Despawn();
+            if (!GetActivated()) SetActivated(false);
         }
     }
 }

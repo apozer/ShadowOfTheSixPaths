@@ -123,9 +123,9 @@ namespace Jutsu
             }
         }
 
-        internal void SpellWheelCheck(bool ignoreReset = false)
+        internal void SpellWheelCheck(bool ignoreReset = false, bool ignoreUntilActive = false)
         {
-            if (GetSeals().HandDistance())
+            if (GetSeals().HandDistance() && !ignoreUntilActive)
             {
                 if (CheckSpellType())
                 {
@@ -139,7 +139,7 @@ namespace Jutsu
             }
             else
             {
-                if (CheckSpellType() && !GetActivated())
+                if (CheckSpellType() && !ignoreUntilActive)
                 {
                     if (ignoreReset)
                     {
@@ -166,9 +166,11 @@ namespace Jutsu
         }
         internal void SpellWheelReset()
         {
+            Debug.Log(JutsuEntry.local.spellWheelDisabled);
             if (JutsuEntry.local.spellWheelDisabled)
             {
                 this.root.Reset();
+                Debug.Log(this.root.GetCurrent());
                 GetSpellCasterLeft().AllowSpellWheel(this);
                 GetSpellCasterRight().AllowSpellWheel(this);
                 JutsuEntry.local.spellWheelDisabled = false;

@@ -33,7 +33,7 @@ namespace Jutsu
             while (true)
             {
                 GetRoot().Update();
-                SpellWheelCheck(true);
+                SpellWheelCheck(true, JutsuEntry.local.spellWheelDisabled);
                 if (GetActivated())
                 {
                     if (!GetJutsuTimerActivated())
@@ -56,6 +56,7 @@ namespace Jutsu
                         creatureData.brainId = "HumanMedium";
                         creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2.5f), Player.local.creature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                         {
+                            GameManager.local.StartCoroutine(ShadowCloneTimer(creature));
                             this.creature = creature;
                             creature.OnDamageEvent += OnDamageEvent;
                             creature.OnDespawnEvent += OnDespawnEvent;
@@ -114,6 +115,12 @@ namespace Jutsu
 
                 yield return null;
             }
+        }
+
+        IEnumerator ShadowCloneTimer(Creature creature)
+        {
+            yield return new WaitForSeconds(19.3f);
+            if(creature) GameManager.local.StartCoroutine(timeAfter(creature));
         }
 
         private void OnDespawnEvent(EventTime eventtime)
