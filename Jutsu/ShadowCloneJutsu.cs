@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.PlayerLoop;
 using UnityEngine.VFX;
 
@@ -33,7 +34,7 @@ namespace Jutsu
             while (true)
             {
                 GetRoot().Update();
-                SpellWheelCheck(true, JutsuEntry.local.spellWheelDisabled);
+                SpellWheelCheck(true);
                 if (GetActivated())
                 {
                     if (!GetJutsuTimerActivated())
@@ -54,6 +55,7 @@ namespace Jutsu
                                 .data.Clone(); //Clone data object, so the Player creature data isnt affected. Without a deep copy, it will update the player to act like an npc
                         creatureData.containerID = "Empty";
                         creatureData.brainId = "HumanMedium";
+                        List<Item> currentItems = Player.currentCreature.equipment.GetAllHolsteredItems();
                         creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2.5f), Player.local.creature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                         {
                             GameManager.local.StartCoroutine(ShadowCloneTimer(creature));
@@ -98,7 +100,7 @@ namespace Jutsu
                                 reaction.lastHitSource = selected;
                             }
                             ClonePlayer.SetCreatureLooks(creature); //Set creature looks to match player
-                            ClonePlayer.SetCreatureEquipment(creature); //Set the creature's equipment to match player
+                            ClonePlayer.SetCreatureEquipment(creature, currentItems); //Set the creature's equipment to match player
                             SetActivated(false);
                         });
                     }
@@ -110,6 +112,7 @@ namespace Jutsu
                     {
                         SetJutsuTimerActivated(false);
                         StopJutsuActiveTimer(true);
+                        ResetAllRootsExcludingThis();
                     }
                 }
 

@@ -127,6 +127,7 @@ namespace Jutsu
             creatureSpawned = false;
             SpellWheelReset();
             waitALittleBit = false;
+            ResetAllRootsExcludingThis();
         }
         IEnumerator CheckIsGrounded()
         {

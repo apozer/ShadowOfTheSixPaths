@@ -191,6 +191,7 @@ namespace Jutsu
                         }
                         chidori.Despawn();
                         SetJutsuTimerActivated(false);
+                        ResetAllRootsExcludingThis();
                     }
                 }
                 yield return null;

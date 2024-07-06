@@ -9,7 +9,7 @@ namespace Jutsu
 
     public class ClonePlayer
     {
-        internal static void SetCreatureEquipment(Creature creature)
+        internal static void SetCreatureEquipment(Creature creature, List<Item> items)
         {
             //check the creature exists
             Creature playerCreature = Player.currentCreature;
@@ -43,7 +43,6 @@ namespace Jutsu
                         creature.equipment.EquipWardrobe(itemContent);
                     }
                 }
-                List<Item> items = playerCreature.equipment.GetAllHolsteredItems();
                 List<(ItemData, Holder)> dataHolders = new List<(ItemData, Holder)>();
                 foreach (var item in items)
                 {

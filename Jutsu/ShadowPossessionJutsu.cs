@@ -296,6 +296,7 @@ namespace Jutsu
                             shadowAttached = false;
                             selectedCreature.brain.SetState(Brain.State.Alert);
                             SpellWheelReset();
+                            ResetAllRootsExcludingThis();
                         }
                     }
                 yield return null;

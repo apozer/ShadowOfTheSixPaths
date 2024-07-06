@@ -66,6 +66,9 @@ namespace Jutsu
         public GameObject shadowCloneVFX;
         public GameObject shadowCloneSpawnSFX;
         public GameObject shadowCloneDeathSFX;
+        
+            //Shadow Shuriken
+            public GameObject shadowShurikenJutsu;
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -108,6 +111,8 @@ namespace Jutsu
             //Shadow Clone Jutsu data
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.VFX", obj => { shadowCloneVFX = obj; },
                 "ShadowCloneVFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowShuriken.VFX", obj => { shadowShurikenJutsu = obj;},
+                "ShadowShurikenVFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Spawn", obj => { shadowCloneSpawnSFX = obj; },
                 "ShadowCloneSpawnSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Death", obj => { shadowCloneDeathSFX = obj; },
@@ -145,6 +150,7 @@ namespace Jutsu
         public Step root;
         public float jutsuActiveTime = 10f;
         public int multiShadowCloneMax = 10;
+        public List<Step> activeRoots = new List<Step>();
         public Dictionary<JutsuSkill, bool> canBeActiveJutsu = new Dictionary<JutsuSkill, bool>();
         public void SequenceManagement()
         {

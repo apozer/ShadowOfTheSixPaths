@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using ThunderRoad;
@@ -72,10 +73,13 @@ namespace Jutsu
         private bool ended = false;
         private float elapsedTime = 0f;
         private Vector3 ogScale;
+        private List<Item> items;
         
         private void Start()
         {
             start = !start; // invert to start update code
+            items = Player.currentCreature.equipment.GetAllHolsteredItems();
+
         }
         void Update()
         {
@@ -124,7 +128,7 @@ namespace Jutsu
                             }
                             reaction.lastHitSource = selected;
                         }
-                        ClonePlayer.SetCreatureEquipment(creature); // Sets gear to players gear
+                        ClonePlayer.SetCreatureEquipment(creature, items); // Sets gear to players gear
                     }
             }
         }

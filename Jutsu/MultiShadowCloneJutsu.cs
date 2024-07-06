@@ -73,24 +73,26 @@ namespace Jutsu
                      if (!startedSpawningCreatures && creatures.Count == 0)
                     {
                         startedSpawningCreatures = true;
-                        var playerPos = Player.currentCreature.transform.position;
-                        Vector3 position = new Vector3(playerPos.x + (Random.Range(-40,40) / 20) , playerPos.y,
-                            playerPos.z + (Random.Range(-40,40) / 20));
-
                         creatureData =
                             (CreatureData) Player.currentCreature
                                 .data.Clone(); //Clone data object, so the Player creature data isnt affected. Without a deep copy, it will update the player to act like an npc
                         creatureData.containerID = "Empty";
                         creatureData.brainId = "HumanMedium";
+                        List<Item> currentItems = Player.currentCreature.equipment.GetAllHolsteredItems();
+                        ;
                         for (int i = Random.Range(0, 6); i < JutsuEntry.local.multiShadowCloneMax; i++)
                         {
+                            var playerPos = Player.currentCreature.transform.position;
+                            Vector3 position = new Vector3(playerPos.x + Random.Range(-0.5f,0.5f) , playerPos.y,
+                                playerPos.z + Random.Range(-0.5f,0.5f));
                             yield return new WaitForSeconds(0.3f);
-                            creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(position),
-                                Player.local.creature.transform.rotation.eulerAngles.y, null, false, null, creature =>
+                            creatureData.SpawnAsync(Player.currentCreature.transform.TransformPoint(position),
+                                Player.currentCreature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                                 {
                                     GameManager.local.StartCoroutine(ShadowCloneTimer(creature));
                                     creatures.Add(creature, false);
                                     creature.OnDamageEvent += OnDamageEvent;
+                                    creature.gameObject.AddComponent<CloneDespawnEvent>().Setup(this.creatures);
                                     vfx = JutsuEntry.local.shadowCloneVFX.DeepCopyByExpressionTree();
                                     vfx.transform.position = creature.ragdoll.targetPart.transform.position;
                                     Object.Instantiate(vfx);
@@ -136,7 +138,7 @@ namespace Jutsu
 
                                     ClonePlayer.SetCreatureLooks(creature); //Set creature looks to match player
                                     ClonePlayer.SetCreatureEquipment(
-                                        creature); //Set the creature's equipment to match player
+                                        creature,currentItems); //Set the creature's equipment to match player
                                 });
 
                             if (i == JutsuEntry.local.multiShadowCloneMax - 1)
@@ -160,6 +162,7 @@ namespace Jutsu
                         SetJutsuTimerActivated(false);
                         SpellWheelReset();
                         startedSpawningCreatures = false;
+                        ResetAllRootsExcludingThis();
                     }
                 }
 
@@ -201,6 +204,28 @@ namespace Jutsu
             creatures.Remove(creature);
             creature.Despawn();
             if (!GetActivated()) SetActivated(false);
+        }
+    }
+
+    public class CloneDespawnEvent : MonoBehaviour
+    {
+        private Creature creature;
+        private Dictionary<Creature, bool> creatures;
+
+        private void Start()
+        {
+            creature = GetComponent<Creature>();
+            creature.OnDespawnEvent += OnDespawn;
+        }
+
+        private void OnDespawn(EventTime eventtime)
+        {
+            this.creatures.Remove(creature);
+        }
+
+        public void Setup(Dictionary<Creature, bool> creatures)
+        {
+            this.creatures = creatures;
         }
     }
 }

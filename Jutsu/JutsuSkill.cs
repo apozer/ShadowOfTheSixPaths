@@ -75,6 +75,7 @@ namespace Jutsu
         {
             base.OnSkillLoaded(skillData, creature);
             this.root = Step.Start();
+            JutsuEntry.local.activeRoots.Add(root);
             seals = new Seals();
             GameManager.local.StartCoroutine(WaitForPlayer());
             jutsuActivated = false;
@@ -167,14 +168,11 @@ namespace Jutsu
         internal void SpellWheelReset()
         {
             Debug.Log(JutsuEntry.local.spellWheelDisabled);
-            if (JutsuEntry.local.spellWheelDisabled)
-            {
                 this.root.Reset();
                 Debug.Log(this.root.GetCurrent());
                 GetSpellCasterLeft().AllowSpellWheel(this);
                 GetSpellCasterRight().AllowSpellWheel(this);
                 JutsuEntry.local.spellWheelDisabled = false;
-            }
         }
 
         internal virtual void CustomStartData()
@@ -190,6 +188,17 @@ namespace Jutsu
         {
             return this.spellInstanceId != "" && ((GetSpellCasterLeft().spellInstance != null && GetSpellCasterLeft().spellInstance.id.Equals(this.spellInstanceId)) ||
                    (GetSpellCasterRight().spellInstance != null && GetSpellCasterRight().spellInstance.id.Equals(this.spellInstanceId)));
+        }
+
+        internal void ResetAllRootsExcludingThis()
+        {
+            foreach (var step in JutsuEntry.local.activeRoots)
+            {
+                if (!step.Equals(root))
+                {
+                    step.Reset();
+                }
+            }
         }
     }
 }
