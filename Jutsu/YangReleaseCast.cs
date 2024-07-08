@@ -13,7 +13,6 @@ namespace Jutsu
         public override void Load(SpellCaster spellCaster)
         {
             base.Load(spellCaster);
-            Debug.Log("Spellcaster loaded");
             foreach (var root in JutsuEntry.local.activeRoots)
             {
                 root.Reset();
@@ -31,19 +30,10 @@ namespace Jutsu
 
         private void ImbueEvent(Collider other, bool enter)
         {
-            Debug.Log("Imbue event trigger hit");
             if(other.gameObject.GetComponentInParent<Item>() is Item item) item.OnThrowEvent += OnThrowEvent;
         }
-
-        public override void UpdateImbue(float speedRatio)
-        {
-            //Debug.Log("Updating imbue.");
-            base.UpdateImbue(speedRatio);
-        }
-
         private void ImbueUsed(SpellCastCharge spellCastCharge, float f, bool fired, EventTime time)
         {
-            Debug.Log("Energy Filled");
                 Item item = spellCastCharge.imbue.colliderGroup.RootGroup.gameObject.GetComponentInParent<Item>();
                 item.OnThrowEvent += OnThrowEvent;
         }
@@ -64,7 +54,6 @@ namespace Jutsu
             if (!active)
             {
                 active = true;
-                Debug.Log("Start on throw event");
                 int number = 4;
                 ItemData itemData = item.data;
                 List<Item> spawnedItems = new List<Item>();
@@ -72,13 +61,11 @@ namespace Jutsu
                 {
                     itemData.SpawnAsync(spawned =>
                     {
-                        Debug.Log("Item spawned");
                         spawned.IgnoreItemCollision(item);
                         spawned.IgnoreRagdollCollision(Player.local.creature.ragdoll);
                         Debug.Log("Spawned: " + spawned.transform.position);
                         var adjusted = new Vector3(item.transform.position.x + Random.Range(1f, -1f),
                             item.transform.position.y, item.transform.position.z + Random.Range(1f, -1f));
-                        Debug.Log("Adjusted: " + adjusted);
                         spawned.transform.position = adjusted;
                         spawned.transform.rotation = item.transform.rotation;
                         spawned.physicBody.velocity = item.physicBody.velocity;
