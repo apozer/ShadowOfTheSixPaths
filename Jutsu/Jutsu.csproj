@@ -98,6 +98,7 @@
         <Compile Include="ItemMeshBakingAndVFXModule.cs" />
         <Compile Include="JutsuEntry.cs" />
         <Compile Include="JutsuSkill.cs" />
+        <Compile Include="LightningCloneJutsu.cs" />
         <Compile Include="LightningReleaseCast.cs" />
         <Compile Include="MultiShadowCloneJutsu.cs" />
         <Compile Include="PhoenixFlowerJutsu.cs" />

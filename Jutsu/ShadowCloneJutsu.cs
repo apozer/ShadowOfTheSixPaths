@@ -46,9 +46,6 @@ namespace Jutsu
                      if (!creatureSpawned)
                     {
                         creatureSpawned = true;
-                        var playerPos = Player.currentCreature.transform.position;
-                        Vector3 position = new Vector3(Random.Range(playerPos.x - 1, playerPos.x + 1), playerPos.y,
-                            Random.Range(playerPos.z - 1, playerPos.z + 1));
 
                         creatureData =
                             (CreatureData) Player.currentCreature

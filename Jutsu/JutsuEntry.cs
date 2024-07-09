@@ -69,6 +69,9 @@ namespace Jutsu
         
             //Shadow Shuriken
             public GameObject shadowShurikenJutsu;
+            
+        //Lightning Clone Jutsu
+        public GameObject lightningCloneVFX;
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -118,6 +121,8 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Death", obj => { shadowCloneDeathSFX = obj; },
                 "ShadowCloneDeathSFX");
             
+            //Lightning Clone Jutsu Data
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.LightningClone.VFX", obj =>{lightningCloneVFX = obj;}, "LightningCloneJutsu");
             return base.LoadAddressableAssetsCoroutine();
         }
 
