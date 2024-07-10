@@ -7,7 +7,7 @@ using UnityEngine.VFX;
 
 namespace Jutsu
 {
-    public class Rasengan : SkillData
+    public class Rasengan : JutsuSkill
     {
         private bool activated = false;
         private bool startVfx = false;
@@ -31,13 +31,21 @@ namespace Jutsu
         public AudioSource rasenganLoopSFX;
 
         public bool startSoundPlayed = false;
+<<<<<<< Updated upstream
         /*public override void OnSkillLoaded(SkillData skillData, Creature creature)
+=======
+
+        internal override void CustomStartData()
+>>>>>>> Stashed changes
         {
-            base.OnSkillLoaded(skillData, creature);
             rasenganData = Catalog.GetData<ItemData>("RasenganItem");
+<<<<<<< Updated upstream
             //rasenganRun = GameManager.local.StartCoroutine(RunRasengan());
             //root = Step.Start();
         }*/
+=======
+        }
+>>>>>>> Stashed changes
 
 
         bool DistanceCheck()
@@ -89,9 +97,8 @@ namespace Jutsu
         private Step root;
         private Collider activeCollider;
         private bool colliderEnabled = false;
-        IEnumerator RunRasengan()
+        internal override IEnumerator JutsuStart() 
         {
-
             while (true)
             {
                 if (DistanceCheck() && VelocityCheck() && !activated && !startVfx && CheckSpellSelected() && Player.local.handLeft.ragdollHand.caster.isFiring && Player.local.handRight.ragdollHand.caster.isFiring)
