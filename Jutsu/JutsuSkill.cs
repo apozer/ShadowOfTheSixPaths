@@ -9,12 +9,18 @@ namespace Jutsu
     {
         private SpellCaster casterLeft;
         private SpellCaster casterRight;
-        private string spellInstanceId;
+        private string spellInstanceId = "";
         private bool jutsuActivated;
         private bool jutsuTimerActivated;
         private Seals seals;
         private Coroutine activeJutsuCoroutine;
+        private Coroutine activeJutsuTimerCoroutine;
+        private Step root;
 
+        public Step GetRoot()
+        {
+            return this.root;
+        }
         public void SetActivated(bool state)
         {
             this.jutsuActivated = state;
@@ -56,17 +62,24 @@ namespace Jutsu
         {
             return this.jutsuTimerActivated;
         }
+
+        public void SetJutsuTimerActivatedCoroutine(Coroutine coroutine)
+        {
+            this.activeJutsuTimerCoroutine = coroutine;
+        }
+        
         
         
 
         public override void OnSkillLoaded(SkillData skillData, Creature creature)
         {
             base.OnSkillLoaded(skillData, creature);
+            this.root = Step.Start();
+            JutsuEntry.local.activeRoots.Add(root);
             seals = new Seals();
             GameManager.local.StartCoroutine(WaitForPlayer());
             jutsuActivated = false;
             jutsuTimerActivated = false;
-            activeJutsuCoroutine = GameManager.local.StartCoroutine(JutsuStart());
 
         }
 
@@ -77,6 +90,7 @@ namespace Jutsu
             this.casterLeft = Player.local.handLeft.ragdollHand.caster;
             this.casterRight = Player.local.handRight.ragdollHand.caster;
             CustomStartData();
+            activeJutsuCoroutine = GameManager.local.StartCoroutine(JutsuStart());
         }
         
         public override void OnSkillUnloaded(SkillData skillData, Creature creature)
@@ -94,42 +108,71 @@ namespace Jutsu
         internal IEnumerator JutsuActive()
         {
             yield return new WaitForSeconds(JutsuEntry.local.jutsuActiveTime);
+            Debug.Log("Jutsu Timer ended");
             SetActivated(false);
             SetJutsuTimerActivated(false);
+            Debug.Log(JutsuEntry.local.spellWheelDisabled);
             SpellWheelReset();
         }
 
-        internal void SpellWheelCheck()
+        internal void StopJutsuActiveTimer(bool resetRoot = false)
         {
-            if(GetSeals().HandDistance())
+            if (this.activeJutsuTimerCoroutine != null)
             {
-                if (!JutsuEntry.local.spellWheelDisabled)
+                GameManager.local.StopCoroutine(this.activeJutsuTimerCoroutine);
+                if(resetRoot) root.Reset();
+            }
+        }
+
+        internal void SpellWheelCheck(bool ignoreReset = false, bool ignoreUntilActive = false)
+        {
+            if (GetSeals().HandDistance() && !ignoreUntilActive)
+            {
+                if (CheckSpellType())
                 {
-                    GetSpellCasterLeft().DisableSpellWheel(this);
-                    GetSpellCasterRight().DisableSpellWheel(this);
-                    JutsuEntry.local.spellWheelDisabled = true;
+                    if (!JutsuEntry.local.spellWheelDisabled)
+                    {
+                        GetSpellCasterLeft().DisableSpellWheel(this);
+                        GetSpellCasterRight().DisableSpellWheel(this);
+                        JutsuEntry.local.spellWheelDisabled = true;
+                    }
                 }
             }
             else
             {
-                if (JutsuEntry.local.spellWheelDisabled)
+                if (CheckSpellType() && !ignoreUntilActive)
                 {
-                    JutsuEntry.local.root.Reset();
-                    GetSpellCasterLeft().AllowSpellWheel(this);
-                    GetSpellCasterRight().AllowSpellWheel(this);
-                    JutsuEntry.local.spellWheelDisabled = false;
+                    if (ignoreReset)
+                    {
+                        if (JutsuEntry.local.spellWheelDisabled)
+                        {
+                            GetSpellCasterLeft().AllowSpellWheel(this);
+                            GetSpellCasterRight().AllowSpellWheel(this);
+                            JutsuEntry.local.spellWheelDisabled = false;
+                        }
+
+                    }
+                    else
+                    {
+                        if (JutsuEntry.local.spellWheelDisabled)
+                        {
+                            this.root.Reset();
+                            GetSpellCasterLeft().AllowSpellWheel(this);
+                            GetSpellCasterRight().AllowSpellWheel(this);
+                            JutsuEntry.local.spellWheelDisabled = false;
+                        }
+                    }
                 }
             }
         }
         internal void SpellWheelReset()
         {
-            if (JutsuEntry.local.spellWheelDisabled)
-            {
-                JutsuEntry.local.root.Reset();
+            Debug.Log(JutsuEntry.local.spellWheelDisabled);
+                this.root.Reset();
+                Debug.Log(this.root.GetCurrent());
                 GetSpellCasterLeft().AllowSpellWheel(this);
                 GetSpellCasterRight().AllowSpellWheel(this);
                 JutsuEntry.local.spellWheelDisabled = false;
-            }
         }
 
         internal virtual void CustomStartData()
@@ -143,8 +186,19 @@ namespace Jutsu
         }
         internal bool CheckSpellType()
         {
-            return (GetSpellCasterLeft().spellInstance != null && GetSpellCasterLeft().spellInstance.id.Equals(this.spellInstanceId)) ||
-                   (GetSpellCasterLeft().spellInstance != null && GetSpellCasterRight().spellInstance.id.Equals(this.spellInstanceId));
+            return this.spellInstanceId != "" && ((GetSpellCasterLeft().spellInstance != null && GetSpellCasterLeft().spellInstance.id.Equals(this.spellInstanceId)) ||
+                   (GetSpellCasterRight().spellInstance != null && GetSpellCasterRight().spellInstance.id.Equals(this.spellInstanceId)));
+        }
+
+        internal void ResetAllRootsExcludingThis()
+        {
+            foreach (var step in JutsuEntry.local.activeRoots)
+            {
+                if (!step.Equals(root))
+                {
+                    step.Reset();
+                }
+            }
         }
     }
 }

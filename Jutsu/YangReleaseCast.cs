@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using ThunderRoad;
+using UnityEngine;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
+
+namespace Jutsu
+{
+    public class YangReleaseCast : SpellCastCharge
+    {
+        public override void Load(SpellCaster spellCaster)
+        {
+            base.Load(spellCaster);
+            foreach (var root in JutsuEntry.local.activeRoots)
+            {
+                root.Reset();
+            }
+
+            spellCaster.OnTriggerImbueEvent += ImbueEvent;
+        }
+
+        public override void Load(Imbue imbue)
+        {
+            Debug.Log("Imbued");
+            base.Load(imbue);
+            imbue.OnImbueUse += ImbueUsed;
+        }
+
+        private void ImbueEvent(Collider other, bool enter)
+        {
+            if(other.gameObject.GetComponentInParent<Item>() is Item item) item.OnThrowEvent += OnThrowEvent;
+        }
+        private void ImbueUsed(SpellCastCharge spellCastCharge, float f, bool fired, EventTime time)
+        {
+                Item item = spellCastCharge.imbue.colliderGroup.RootGroup.gameObject.GetComponentInParent<Item>();
+                item.OnThrowEvent += OnThrowEvent;
+        }
+
+        private bool active = false;
+        private Item currentThrown;
+        private void OnThrowEvent(Item item)
+        {
+            currentThrown = item;
+            GameManager.local.StartCoroutine(ItemSpawning(item));
+
+        }
+
+
+        IEnumerator ItemSpawning(Item item)
+        {
+            yield return new WaitForSeconds(0.1f);
+            if (!active)
+            {
+                active = true;
+                int number = 4;
+                ItemData itemData = item.data;
+                List<Item> spawnedItems = new List<Item>();
+                for (int i = 0; i < number; i++)
+                {
+                    itemData.SpawnAsync(spawned =>
+                    {
+                        spawned.IgnoreItemCollision(item);
+                        spawned.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+                        Debug.Log("Spawned: " + spawned.transform.position);
+                        var adjusted = new Vector3(item.transform.position.x + Random.Range(1f, -1f),
+                            item.transform.position.y, item.transform.position.z + Random.Range(1f, -1f));
+                        spawned.transform.position = adjusted;
+                        spawned.transform.rotation = item.transform.rotation;
+                        spawned.physicBody.velocity = item.physicBody.velocity;
+                        GameObject vfx = JutsuEntry.local.shadowShurikenJutsu;
+                        GameObject spawnSfx = JutsuEntry.local.shadowCloneSpawnSFX.DeepCopyByExpressionTree();
+                        vfx.transform.position = spawned.transform.position;
+                        vfx.transform.rotation = spawned.transform.rotation;
+                        spawnSfx.transform.position = spawned.transform.position;
+                        Object.Instantiate(vfx);
+                        Object.Instantiate(spawnSfx);
+                        spawnedItems.Add(spawned);
+                        foreach (var spawnedItem in spawnedItems)
+                        {
+                            if (spawnedItem.Equals(spawned)) continue;
+                            spawned.IgnoreItemCollision(spawnedItem);
+                        }
+
+                        GameManager.local.StartCoroutine(ItemTimer(spawned, spawnedItems));
+                    });
+                }
+            }
+        }
+
+        IEnumerator ItemTimer(Item item, List<Item> spawnedItems)
+        {
+            item.transform.rotation = currentThrown.transform.rotation;
+            item.physicBody.velocity = item.physicBody.velocity;
+            yield return new WaitForSeconds(10f);
+            GameObject vfx = JutsuEntry.local.shadowShurikenJutsu;
+            vfx.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            vfx.transform.position = item.transform.position;
+            vfx.transform.rotation = item.flyDirRef.rotation;
+            GameObject despawnSfx = JutsuEntry.local.shadowCloneDeathSFX.DeepCopyByExpressionTree();
+            despawnSfx.transform.position = item.transform.position;
+            Object.Instantiate(vfx);
+            Object.Instantiate(despawnSfx);
+            item.Despawn();
+
+            if (spawnedItems.Count == 0) active = false;
+        }
+    }
+}

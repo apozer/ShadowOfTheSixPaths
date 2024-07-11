@@ -31,7 +31,7 @@ namespace Jutsu
         internal override void CustomStartData()
         {
             SetSpellInstanceID(spellId);
-            var activated = JutsuEntry.local.root.Then(() => GetSeals().HandDistance(GetActivated()) && (CheckSpellType())).Do(() => JutsuEntry.local.root.Reset());
+            var activated = GetRoot().Then(() => GetSeals().HandDistance(GetActivated()) && (CheckSpellType()));
             activated.Then(GetSeals().MonkeySeal)
                 .Then(GetSeals().DragonSeal)
                 .Then(GetSeals().RatSeal)
@@ -54,16 +54,17 @@ namespace Jutsu
             yield return new WaitForSeconds(2f);
             while (true)
             {
-                JutsuEntry.local.root.Update();
-                if (JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset(); 
-                SpellWheelCheck();
+                GetRoot().Update();
+                if (JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset();
+                bool value;
+                SpellWheelCheck(GetActivated());
                 
                 if (GetActivated())
                 {
                     if (!GetJutsuTimerActivated())
                     {
                         SetJutsuTimerActivated(true);
-                        GameManager.local.StartCoroutine(JutsuActive());
+                        SetJutsuTimerActivatedCoroutine(GameManager.local.StartCoroutine(JutsuActive()));
                     }
                     if (!chidori && !chidoriStarted)
                     {
@@ -190,6 +191,7 @@ namespace Jutsu
                         }
                         chidori.Despawn();
                         SetJutsuTimerActivated(false);
+                        ResetAllRootsExcludingThis();
                     }
                 }
                 yield return null;

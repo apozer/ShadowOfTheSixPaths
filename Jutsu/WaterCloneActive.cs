@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using ThunderRoad;
@@ -72,12 +73,13 @@ namespace Jutsu
         private bool ended = false;
         private float elapsedTime = 0f;
         private Vector3 ogScale;
+        private List<Item> items;
         
         private void Start()
         {
-            ogScale = creature.gameObject.transform.localScale; // cache original scale
-            creature.gameObject.transform.localScale = new Vector3(creature.gameObject.transform.localScale.x, height, creature.gameObject.transform.localScale.z); //flatten creauture size
             start = !start; // invert to start update code
+            items = Player.currentCreature.equipment.GetAllHolsteredItems();
+
         }
         void Update()
         {
@@ -126,53 +128,14 @@ namespace Jutsu
                             }
                             reaction.lastHitSource = selected;
                         }
-                        SetCreatureEquipment(creature); // Sets gear to players gear
+                        ClonePlayer.SetCreatureEquipment(creature, items); // Sets gear to players gear
                     }
             }
         }
-        public void Setup(Creature creature)
+        public void Setup(Creature creature, Vector3 scale)
         {
             this.creature = creature;
-        }
-        private static void SetCreatureEquipment(Creature creature)
-        {
-            Creature playerCreature = Player.currentCreature;
-            
-            if(playerCreature == null) return;
-            
-            Container playerContainer = playerCreature.container;
-            
-            if (playerContainer == null || playerContainer.contents == null) return;
-            
-            try
-            {
-                foreach (ContainerContent content in playerContainer.contents)
-                {
-                    //add the content to the creatures container
-                    creature.container.contents.Add(content);
-                    //check if its a wardrobe item and equip it
-                    /*if (content..TryGetModule(out ItemModuleWardrobe _))
-                    {
-                        creature.equipment.EquipWardrobe(content);
-                    }*/
-
-                    //check if its a holder item and spawn and snap it
-                    /*if (content.TryGetState(out ContentStateHolder state))
-                    {
-                        content.Spawn(item => {
-                            foreach (Holder holder in creature.holders)
-                            {
-                                if (holder.name != state.holderName) continue;
-                                holder.Snap(item, true, true);
-                            }
-                        });
-                    }*/
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Something went wrong when setting the creatures equipment {e}");
-            }
+            this.ogScale = scale;
         }
     }
 }

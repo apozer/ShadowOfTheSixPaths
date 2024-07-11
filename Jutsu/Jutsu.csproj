@@ -89,6 +89,7 @@
     <ItemGroup>
         <Compile Include="BakeVFX.cs" />
         <Compile Include="Chidori.cs" />
+        <Compile Include="ClonePlayer.cs" />
         <Compile Include="CoroutineManager.cs" />
         <Compile Include="Despawn.cs" />
         <Compile Include="FlameFollow.cs" />
@@ -98,6 +99,7 @@
         <Compile Include="JutsuEntry.cs" />
         <Compile Include="JutsuSkill.cs" />
         <Compile Include="LightningReleaseCast.cs" />
+        <Compile Include="MultiShadowCloneJutsu.cs" />
         <Compile Include="PhoenixFlowerJutsu.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Rasengan.cs" />
@@ -106,6 +108,7 @@
         <Compile Include="SDFBakeTool.cs" />
         <Compile Include="Seals.cs" />
         <Compile Include="SequenceTracker.cs" />
+        <Compile Include="ShadowCloneJutsu.cs" />
         <Compile Include="ShadowPossessionController.cs" />
         <Compile Include="ShadowPossessionJutsu.cs" />
         <Compile Include="SharkBombItem.cs" />
@@ -114,7 +117,9 @@
         <Compile Include="SubstitutionJutsu.cs" />
         <Compile Include="WaterCloneActive.cs" />
         <Compile Include="WaterCloneJutsu.cs" />
+        <Compile Include="WaterReleaseCast.cs" />
         <Compile Include="WaterSharkBombJutsu.cs" />
+        <Compile Include="YangReleaseCast.cs" />
         <Compile Include="YinReleaseCast.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

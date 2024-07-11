@@ -54,6 +54,21 @@ namespace Jutsu
         public GameObject monkeySealRightTransform;
         public GameObject monkeySealLeftTransform;
         public bool spellWheelDisabled = false;
+        
+        //Water Clone
+        public string waterMaterialAddress = "SOTSP.Jutsu.WaterRelease.VFX.WaterMaterial";
+        public GameObject waterVFX;
+        public GameObject sound1;
+        public GameObject sound2;
+        public Material waterMaterial;
+        
+        //Shadow Clone
+        public GameObject shadowCloneVFX;
+        public GameObject shadowCloneSpawnSFX;
+        public GameObject shadowCloneDeathSFX;
+        
+            //Shadow Shuriken
+            public GameObject shadowShurikenJutsu;
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -68,17 +83,44 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.start", go => { chidoriStartSFX = go;}, "ChidoriStartSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.loop",
                 go => { chidoriLoopSFX = go;}, "ChidoriLoopSFX");
-            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Start", go => { chidoriStartSFX = go;}, "ChidoriStartSFX");
+            
+            //Rasengan Audio
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Start", go => { rasenganStartSFX = go;}, "RasenganStartSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Loop",
-                go => { chidoriLoopSFX = go;}, "ChidoriLoopSFX");
+                go => { rasenganLoopSFX = go;}, "RasenganLoopSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.HandSigns.MonkeyLeft", go => { monkeySealLeftTransform = go;}, "MonkeySealLeftTransform");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.HandSigns.MonkeyRight", go => { monkeySealRightTransform = go;}, "MonkeySealRightTransform");
             
             //Shadow Possesion
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YinRelease.ShadowPossession", go => { shadow = go;}, "ShadowVFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YinRelease.SFX.ShadowPossession", go => { shadowSFX = go;}, "ShadowSFX");
-            return base.LoadAddressableAssetsCoroutine();
             
+            //Water Clone jutsu
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.VFX.Waterfall", gameobject => { waterVFX = gameobject; },
+                "WaterFallEffect");
+
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.SFX.Spawn",
+                gameobject => { sound1 = gameobject; }, "WaterSFX1");
+
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.WaterRelease.WaterClone.SFX.Splash", obj => { sound2 = obj; },
+                "SplashSFX");
+
+            Catalog.LoadAssetAsync<Material>(waterMaterialAddress,
+                waterMaterial => { this.waterMaterial = waterMaterial; },
+                "WaterMaterial");
+            
+            
+            //Shadow Clone Jutsu data
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.VFX", obj => { shadowCloneVFX = obj; },
+                "ShadowCloneVFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowShuriken.VFX", obj => { shadowShurikenJutsu = obj;},
+                "ShadowShurikenVFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Spawn", obj => { shadowCloneSpawnSFX = obj; },
+                "ShadowCloneSpawnSFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Death", obj => { shadowCloneDeathSFX = obj; },
+                "ShadowCloneDeathSFX");
+            
+            return base.LoadAddressableAssetsCoroutine();
         }
 
         async void AsyncSetup()
@@ -109,6 +151,9 @@ namespace Jutsu
 
         public Step root;
         public float jutsuActiveTime = 10f;
+        public int multiShadowCloneMax = 10;
+        public List<Step> activeRoots = new List<Step>();
+        public Dictionary<JutsuSkill, bool> canBeActiveJutsu = new Dictionary<JutsuSkill, bool>();
         public void SequenceManagement()
         {
             root = Step.Start();

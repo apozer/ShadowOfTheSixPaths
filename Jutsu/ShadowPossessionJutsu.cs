@@ -65,7 +65,7 @@ namespace Jutsu
             SetSpellInstanceID(spellId);
             shadow = JutsuEntry.local.shadow;
             shadowSFX = JutsuEntry.local.shadowSFX;
-            var activated = JutsuEntry.local.root.Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType()).Do(() => JutsuEntry.local.root.Reset());
+            var activated = GetRoot().Then(() => GetSeals().HandDistance(GetActivated()) && CheckSpellType());
             activated
                 .Then(GetSeals().RatSeal)
                 .Do(() => SetActivated(true));
@@ -76,10 +76,10 @@ namespace Jutsu
             yield return new WaitForSeconds(2f);
             while (true)
             {
-                JutsuEntry.local.root.Update();
+                GetRoot().Update();
                 if(JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset();
                 
-                SpellWheelCheck();
+                SpellWheelCheck(GetActivated());
                 
                 if (!instantiated && GetActivated())
                 {
@@ -296,6 +296,7 @@ namespace Jutsu
                             shadowAttached = false;
                             selectedCreature.brain.SetState(Brain.State.Alert);
                             SpellWheelReset();
+                            ResetAllRootsExcludingThis();
                         }
                     }
                 yield return null;
