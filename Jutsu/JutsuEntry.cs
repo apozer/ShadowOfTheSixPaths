@@ -83,6 +83,8 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.start", go => { chidoriStartSFX = go;}, "ChidoriStartSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.loop",
                 go => { chidoriLoopSFX = go;}, "ChidoriLoopSFX");
+            
+            //Rasengan Audio
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Start", go => { rasenganStartSFX = go;}, "RasenganStartSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Chakra.Rasengan.SFX.Loop",
                 go => { rasenganLoopSFX = go;}, "RasenganLoopSFX");
