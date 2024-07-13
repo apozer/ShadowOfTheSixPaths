@@ -58,6 +58,7 @@ namespace Jutsu
                         List<Item> currentItems = Player.currentCreature.equipment.GetAllHolsteredItems();
                         creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2.5f), Player.local.creature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                         {
+                            creature.countTowardsMaxAlive = false;
                             GameManager.local.StartCoroutine(ShadowCloneTimer(creature));
                             this.creature = creature;
                             creature.OnDamageEvent += OnDamageEvent;

@@ -55,6 +55,7 @@ namespace Jutsu
                         creatureData.brainId = "HumanMedium";
                         creatureData.SpawnAsync(Player.local.creature.transform.TransformPoint(0,0,2), 0, null, false, null, creature =>
                         {
+                            creature.countTowardsMaxAlive = false;
                             creature.OnDamageEvent += OnDamageEvent;
                            var ogScale = creature.gameObject.transform.localScale; // cache original scale
                             creature.gameObject.transform.localScale = new Vector3(creature.gameObject.transform.localScale.x, 0f, creature.gameObject.transform.localScale.z); //flatten creauture size

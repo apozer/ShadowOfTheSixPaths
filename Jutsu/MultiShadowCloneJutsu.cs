@@ -89,6 +89,7 @@ namespace Jutsu
                             creatureData.SpawnAsync(Player.currentCreature.transform.TransformPoint(position),
                                 Player.currentCreature.transform.rotation.eulerAngles.y, null, false, null, creature =>
                                 {
+                                    creature.countTowardsMaxAlive = false;
                                     GameManager.local.StartCoroutine(ShadowCloneTimer(creature));
                                     creatures.Add(creature, false);
                                     creature.OnDamageEvent += OnDamageEvent;
