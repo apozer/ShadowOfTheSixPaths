@@ -27,9 +27,14 @@ namespace Jutsu
         private bool chidoriStarted = false;
         private bool vfxStarted = false;
         private readonly string spellId = "LightningInit";
+        private List<Creature> piercable = new List<Creature>();
 
         internal override void CustomStartData()
         {
+            EventManager.onCreatureSpawn += creature =>
+            {
+                if(!creature.isPlayer) piercable.Add(creature);
+            };
             SetSpellInstanceID(spellId);
             var activated = GetRoot().Then(() => GetSeals().HandDistance(GetActivated()) && (CheckSpellType()));
             activated.Then(GetSeals().MonkeySeal)
@@ -47,7 +52,7 @@ namespace Jutsu
         private FixedJoint joint;
         private bool hasPenetrated = false;
         private Creature penetrated;
-
+        private int currentCount = 0;
 
         internal override IEnumerator JutsuStart()
         {
@@ -80,7 +85,7 @@ namespace Jutsu
                                 chidori.physicBody.useGravity = false;
                                 
                                 chidori.transform.position =
-                                    Player.local.handRight.ragdollHand.transform.position;
+                                    Player.local.handRight.ragdollHand.transform.position + (Player.local.handRight.ragdollHand.PointDir * 0.05f);
                                 chidori.transform.rotation =
                                     Player.local.handRight.ragdollHand.transform.rotation;
                                 
@@ -90,8 +95,8 @@ namespace Jutsu
                                 joint.breakForce = Mathf.Infinity;
                                 joint.breakTorque =  Mathf.Infinity;
                                 joint.connectedBody = chidori.physicBody.rigidBody;
-                                
-                                foreach (Creature c in Creature.allActive)
+                                currentCount = piercable.Count;
+                                foreach (Creature c in piercable)
                                 {
                                     if (!c.isPlayer)
                                     {
@@ -117,6 +122,21 @@ namespace Jutsu
 
                     else if(chidori)
                     {
+                        Debug.Log("Piercable size: " + piercable.Count);
+                        Debug.Log("Current count: " + currentCount);
+                        if (piercable.Count != currentCount)
+                        {
+                            foreach (Creature c in piercable)
+                            {
+                                if (!c.isPlayer)
+                                {
+                                    Player.local.creature.ragdoll.rightUpperArmPart.ragdoll
+                                        .IgnoreCollision(c.ragdoll, true);
+                                    Player.local.creature.handRight.ragdoll.IgnoreCollision(c.ragdoll, true);
+                                }
+                            }
+                            currentCount = piercable.Count;
+                        }
                         //While spell active and holding trigger
                             //Check to see if sound is played
                             if (!startSoundPlayed)
@@ -148,7 +168,7 @@ namespace Jutsu
                             {
                                 GameObject.DestroyImmediate(joint);
                                 chidori.transform.position =
-                                    Player.local.handRight.ragdollHand.transform.position;
+                                    Player.local.handRight.ragdollHand.transform.position + (Player.local.handRight.ragdollHand.PointDir * 0.05f);
                                 chidori.transform.rotation =
                                     Player.local.handRight.ragdollHand.transform.rotation;
                                 chidori.IgnoreRagdollCollision(Player.local.creature.ragdoll);
@@ -180,7 +200,7 @@ namespace Jutsu
                         chidoriVFX.Stop();
                         chidoriStarted = false;
                         vfxStarted = false;
-                        foreach (Creature c in Creature.allActive)
+                        foreach (Creature c in piercable)
                         {
                             if (!c.isPlayer)
                             {
