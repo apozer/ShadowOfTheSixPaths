@@ -88,6 +88,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="BakeVFX.cs" />
+        <Compile Include="ChakraReceiver.cs" />
         <Compile Include="Chidori.cs" />
         <Compile Include="ClonePlayer.cs" />
         <Compile Include="CoroutineManager.cs" />
@@ -105,6 +106,8 @@
         <Compile Include="Rasengan.cs" />
         <Compile Include="RasenganMono.cs" />
         <Compile Include="Rasenshuriken.cs" />
+        <Compile Include="ReceiverSizing.cs" />
+        <Compile Include="RinneganCastJutsu.cs" />
         <Compile Include="SDFBakeTool.cs" />
         <Compile Include="Seals.cs" />
         <Compile Include="SequenceTracker.cs" />
