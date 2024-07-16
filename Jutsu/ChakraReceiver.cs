@@ -10,6 +10,8 @@ namespace Jutsu
         private bool spawned = false;
         internal override void CustomStartData()
         {
+
+            return;
             SetSpellInstanceID(spellInstanceId);
             var activated = GetRoot().Then(() => GetSeals().HandDistance(GetActivated()) && (CheckSpellType()));
             activated.Then(GetSeals().DragonSeal)
@@ -20,7 +22,7 @@ namespace Jutsu
 
         internal override IEnumerator JutsuStart()
         {
-            while (true)
+            while (false)
             {
                 GetRoot().Update();
                 if (JutsuEntry.local.root.AtEnd()) JutsuEntry.local.root.Reset();

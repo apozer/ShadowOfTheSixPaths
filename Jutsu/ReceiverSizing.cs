@@ -8,23 +8,28 @@ namespace Jutsu
     public class ReceiverSizing : MonoBehaviour
     {
         private Item item;
+        private SpellCaster _spellCaster;
         private bool ended = false;
         private bool setupDone = false;
         private float elapsedTime = 0f;
         private Vector3 endSize;
         private float maxLength = 3f;
         private bool debugPierce = false;
+        private RinneganCastJutsu active;
         private Dictionary<Damager, LineRenderer> renderers = new Dictionary<Damager, LineRenderer>();
         private void Start()
         {
             item = GetComponent<Item>();
-            Debug.Log("Item position: " + item.transform.position);
-            Debug.Log("Caster position: " + Player.currentCreature.handRight.caster.transform.position);
             item.OnGrabEvent += OnGrab;
             item.transform.localScale = new Vector3(1, 1, 0);
             endSize = new Vector3(1, 1, maxLength);
             setupDone = true;
-            Debug.Log("Completed startup");
+        }
+
+        public void Setup(SpellCaster spellCaster, RinneganCastJutsu active)
+        {
+            _spellCaster = spellCaster;
+            this.active = active;
         }
 
         private void OnGrab(Handle handle, RagdollHand ragdollhand)
@@ -39,6 +44,8 @@ namespace Jutsu
                         damager.penetrationDepth = 0.25f * item.transform.localScale.z;
                     }
                 }
+
+                active.spawned = false;
             }
         }
 
@@ -46,10 +53,10 @@ namespace Jutsu
         {
             if (!ended && setupDone)
             {
-                item.transform.position = Player.currentCreature.handRight.caster.magicSource.transform.position -
-                                          Player.currentCreature.handRight.PalmDir * 0.05f;
-                item.transform.rotation = Player.currentCreature.handRight.caster.magicSource.transform.rotation;
-                if (Player.currentCreature.handRight.caster.isFiring)
+                item.transform.position = _spellCaster.magicSource.transform.position -
+                                          _spellCaster.ragdollHand.PalmDir * 0.05f;
+                item.transform.rotation = _spellCaster.magicSource.transform.rotation;
+                if (_spellCaster.isFiring)
                 {
                     elapsedTime += Time.deltaTime;
                     float percentageComplete = elapsedTime / (2f * (maxLength * maxLength));
@@ -92,7 +99,8 @@ namespace Jutsu
                         ended = true;
                         elapsedTime = 0f;
                         item.transform.localScale = new Vector3(1, 1, maxLength);
-                        Player.currentCreature.handRight.Grab(item.mainHandleRight);
+                        _spellCaster.ragdollHand.Grab(item.mainHandleRight);
+                        active.spawned = false;
                     }
                 }
             }
