@@ -44,7 +44,6 @@ namespace Jutsu
                         damager.penetrationDepth = 0.25f * item.transform.localScale.z;
                     }
                 }
-
                 active.spawned = false;
             }
         }
