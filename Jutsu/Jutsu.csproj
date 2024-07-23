@@ -114,6 +114,7 @@
         <Compile Include="ShadowCloneJutsu.cs" />
         <Compile Include="ShadowPossessionController.cs" />
         <Compile Include="ShadowPossessionJutsu.cs" />
+        <Compile Include="SharinganTestin.cs" />
         <Compile Include="SharkBombItem.cs" />
         <Compile Include="ShurikenRotate.cs" />
         <Compile Include="SpellCastChakra.cs" />

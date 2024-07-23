@@ -1,11 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Speech.Recognition;
 using System.Threading.Tasks;
 using ThunderRoad;
 using UnityEngine;
-using static UnityEngine.AddressableAssets.Addressables;
 using Debug = UnityEngine.Debug;
 
 namespace Jutsu
@@ -67,8 +67,22 @@ namespace Jutsu
         public GameObject shadowCloneSpawnSFX;
         public GameObject shadowCloneDeathSFX;
         
-            //Shadow Shuriken
-            public GameObject shadowShurikenJutsu;
+        //Shadow Shuriken
+        public GameObject shadowShurikenJutsu;
+
+
+        public Material lerpMaterial;
+        //Sharingan Eye Materials
+        public Texture2D threeTomoeSharingan;
+        
+        //Rinnegan Eye Materials
+        public Texture2D rinneganBase;
+        
+        
+        //Tracking Eye Materials
+        internal string lastActive = "";
+        private string currentlyActive = "";
+        public Material originalEyeColorMaterial;
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -78,6 +92,8 @@ namespace Jutsu
             
         }
 
+        internal GameObject lerpReferenceGO = new GameObject();
+        internal LerpMaterialChanges _lerpMaterialChanges;
         public override IEnumerator LoadAddressableAssetsCoroutine()
         {
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.LightningRelease.Chidori.SFX.start", go => { chidoriStartSFX = go;}, "ChidoriStartSFX");
@@ -120,34 +136,88 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.YangRelease.ShadowClone.SFX.Death", obj => { shadowCloneDeathSFX = obj; },
                 "ShadowCloneDeathSFX");
             
+            //Lerp Material
+            Catalog.LoadAssetAsync<Material>("SOTSP.Jutsu.Materials.Lerp", obj => { 
+                lerpMaterial = obj;
+            }, "Lerp Material");
+            //Sharingan Eye Materials
+            Catalog.LoadAssetAsync<Texture2D>("SOTSP.Jutsu.Sharingan.BaseSharingan.Texture", obj =>
+            {
+                threeTomoeSharingan = obj;
+            }, "Three Tomoe Sharingan");
+            
+            //Rinnegan Eye Materials
+            Catalog.LoadAssetAsync<Texture2D>("SOTSP.Jutsu.Rinnegan.BaseRinnegan.Texture", obj =>
+            {
+                rinneganBase = obj;
+            }, "Rinnegan");
             return base.LoadAddressableAssetsCoroutine();
         }
 
+        
+        public Choices sharinganOptions = new Choices();
+        SpeechRecognitionEngine recognizer;
         async void AsyncSetup()
         {
             await Task.Run(() =>
             {
+                _lerpMaterialChanges = lerpReferenceGO.AddComponent<LerpMaterialChanges>();
+                _lerpMaterialChanges.sharinganBase = threeTomoeSharingan;
+                _lerpMaterialChanges.lerpMaterial = this.lerpMaterial;
+                _lerpMaterialChanges.rinneganBase = rinneganBase;
+                Debug.Log("Setting lerp changes");
                 SequenceManagement();
-                //coroutineManager = coroutine.AddComponent<CoroutineManager>();
-                //Add new component of Coroutine Manager to coroutine manager reference
                 //Prevents game from getting hung up when using speech recognition engine.
                 Application.quitting += () => Process.GetCurrentProcess().Kill();
                 
-                //get GameObjects for VFX or SFX for jutsus
-                /*logData = Catalog.GetData<ItemData>("JutsuLog");
-                Catalog.LoadAssetAsync<GameObject>("apoz123.Jutsu.YinRelease.VFX.ShadowPosession",
-                    gameobject => { shadow = gameobject;}, "ShadowPossesion");
-                Catalog.LoadAssetAsync<GameObject>("apoz123.Jutsu.YinRelease.VFX.ShadowPossessionJutsu.SFX",
-                    go => { shadowSFX = go;}, "ShadowPossessionSFX");*/
-                //Catalog.LoadAssetAsync<GameObject>("apoz123.LightningStyle.Chidori", go => { chidori = go;}, "ChidoriVFX");
-                //GameManager.local.StartCoroutine(Catalog.LoadAddressableAssetsCoroutine());
-
-               // GameManager.local.StartCoroutine(loadAssetCoroutine);
-                //GameManager.local.StartCoroutine(assetCoroutine);
-                /*Catalog.LoadAssetAsync<GameObject>("apoz123.Jutsu.WindRelease.VFX.VacuumBlade", data =>{this.vacuumBlade = data;}, "VacuumBladeVFX");*/
-                /*Catalog.LoadAssetAsync<GameObject>("debugObject", data =>{this.debugObject = data;}, "DebugObject");*/
+                sharinganOptions.Add("Sharingan");
+                sharinganOptions.Add("Rinnaygan");
+                sharinganOptions.Add("Disable");
+                recognizer = new SpeechRecognitionEngine();
+                Grammar servicesGrammar = new Grammar(new GrammarBuilder(sharinganOptions));
+                recognizer.RequestRecognizerUpdate();
+                recognizer.LoadGrammarAsync(servicesGrammar);
+                recognizer.SetInputToDefaultAudioDevice();
+                recognizer.RecognizeAsync(RecognizeMode.Multiple);
+                recognizer.SpeechRecognized += Recognizer_SpeechRecognized;
             });
         }
+
+        internal EyeMaterialState state = EyeMaterialState.NotActive;
+        internal enum EyeMaterialState{
+            NotActive,
+            Disabled,
+            Sharingan,
+            Rinnegan
+        }
+        
+        private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+                Debug.Log(e.Result.Text);
+                if (e.Result.Confidence < 0.93f) return;
+                if (!transitionActive)
+                {
+                    Debug.Log("Lepr Material Changes: " + _lerpMaterialChanges);
+                    Debug.Log("Last active in async: " + lastActive);
+                    if (lastActive.ToLower().Contains(e.Result.Text.ToLower())) return;
+
+                    if (e.Result.Text.ToLower().Equals("disable"))
+                    {
+                        state = EyeMaterialState.Disabled;
+                    }
+                    if (e.Result.Text.ToLower().Equals("sharingan"))
+                    {
+                        Debug.Log("last active: " + lastActive);
+                        state = EyeMaterialState.Sharingan;
+                    }
+                    if (e.Result.Text.ToLower().Equals("rinnaygan"))
+                    {
+                        state = EyeMaterialState.Rinnegan;
+                    }
+                }
+        }
+
+        internal bool transitionActive = false;
 
         public Step root;
         public float jutsuActiveTime = 10f;
@@ -159,6 +229,125 @@ namespace Jutsu
             root = Step.Start();
         }
     }
-    
+
+    internal class LerpMaterialChanges : MonoBehaviour
+    {
+        public Material lerpMaterial;
+        public Texture2D sharinganBase;
+        public Texture2D rinneganBase;
+        public Material defaultColor;
+        private JutsuEntry.EyeMaterialState lastState = JutsuEntry.EyeMaterialState.NotActive;
+
+        public void Execute(string lastActive, string nextActive)
+        {
+            Debug.Log("Executing code");
+            
+            Debug.Log("Thing 1 is: " + sharinganBase);
+            Debug.Log("Thing 2 is: " + rinneganBase);
+            Debug.Log("Thing 1 is: " + GetTransitionStart(lastActive));
+            Debug.Log("Thing 2 is: " + GetTransitionStart(nextActive));
+            SetMaterialData(GetTransitionStart(lastActive), GetTransitionStart(nextActive));
+        }
+        
+        Texture GetTransitionStart(string lastActive)
+        {
+            switch (lastActive)
+            {
+                case "":
+                    Debug.Log(defaultColor);
+                    return defaultColor.GetTexture("_BaseMap");
+                case "sharinganBase":
+                    Debug.Log(sharinganBase);
+                    return sharinganBase;
+                case "rinnayganBase":
+                    return rinneganBase;
+                default:
+                    return defaultColor.GetTexture("_BaseMap");
+            }
+        }
+        public void SetMaterialData(Texture texture1, Texture texture2)
+        {
+            
+            Debug.Log("Textures adding");
+            lerpMaterial.SetFloat("_transition", 0f);
+            lerpMaterial.SetTexture("_OriginalTexture", texture1);
+            lerpMaterial.SetTexture("_sharinganTexture", texture2);
+            Debug.Log("Textures added");
+            GameManager.local.StartCoroutine(TransitionEyeMaterial());
+        }
+        
+        public IEnumerator TransitionEyeMaterial()
+        {
+            Debug.Log("Hit the coroutine");
+            bool active = true;
+            while (active)
+            {
+                if (!lerpMaterial) yield return null;
+                if (lerpMaterial.GetFloat("_transition") < 1f)
+                {
+                    JutsuEntry.local.transitionActive = true;
+                    lerpMaterial.SetFloat("_transition",
+                        lerpMaterial.GetFloat("_transition") + 0.02f);
+                }
+                else
+                {
+                    JutsuEntry.local.transitionActive = false;
+                    lerpMaterial.SetFloat("_transition", 1f);
+                    Debug.Log("ended transitions");
+                    active = false;
+                }
+
+                yield return Yielders.EndOfFrame;
+            }
+        }
+
+        private bool stateChanged;
+
+        string GetLastActive()
+        {
+            switch (lastState)
+            {
+                case JutsuEntry.EyeMaterialState.NotActive:
+                    return "";
+                case JutsuEntry.EyeMaterialState.Disabled:
+                    return "";
+                case JutsuEntry.EyeMaterialState.Sharingan:
+                    return "sharinganBase";
+                case JutsuEntry.EyeMaterialState.Rinnegan:
+                    return "rinnayganBase";
+                default:
+                    return "";
+            }
+        }
+        private void Update()
+        {
+            Debug.Log("Jutsu Entry last state: " + JutsuEntry.local.state);
+            Debug.Log("Jutsu Entry transition: " + JutsuEntry.local.transitionActive);
+            Debug.Log("Local last state: " + lastState);
+            Debug.Log("Default color: " + defaultColor);
+            if (!JutsuEntry.local.transitionActive  && lastState != JutsuEntry.local.state && defaultColor)
+            {
+                Debug.Log("Checked into update method in LerpMaterialChanges");
+                switch (JutsuEntry.local.state)
+                {
+                    case JutsuEntry.EyeMaterialState.Disabled:
+                        Execute(GetLastActive(), "");
+                        lastState = JutsuEntry.EyeMaterialState.Disabled;
+                        JutsuEntry.local.lastActive = "";
+                        break;
+                    case JutsuEntry.EyeMaterialState.Sharingan:
+                        Execute(GetLastActive(), "sharinganBase");
+                        lastState = JutsuEntry.EyeMaterialState.Sharingan;
+                        JutsuEntry.local.lastActive = "sharinganBase";
+                        break;
+                    case JutsuEntry.EyeMaterialState.Rinnegan:
+                        Execute(GetLastActive(), "rinnayganBase");
+                        lastState = JutsuEntry.EyeMaterialState.Rinnegan;
+                        JutsuEntry.local.lastActive = "rinnayganBase";
+                        break;
+                }
+            }
+        }
+    }
     
 }
