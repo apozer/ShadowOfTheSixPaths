@@ -13,6 +13,7 @@ namespace Jutsu
         {
             base.ScriptLoaded(modData);
             Player.onSpawn += OnSpawn;
+            EventManager.onLevelLoad += (data, mode, time) => { this.raceInstantiated = false;};
         }
 
         private void OnSpawn(Player player)
@@ -31,7 +32,7 @@ namespace Jutsu
                 raceInstantiated = true;
             };
         }
-
+        
         IEnumerator WaitForRenderers(Creature creature)
         {
             yield return new WaitUntil(() => creature.renderers.Count > 0);
@@ -41,16 +42,31 @@ namespace Jutsu
                 JutsuEntry.local._lerpMaterialChanges.sharinganBase =  JutsuEntry.local.threeTomoeSharingan;
                 JutsuEntry.local._lerpMaterialChanges.lerpMaterial =  JutsuEntry.local.lerpMaterial;
                 JutsuEntry.local._lerpMaterialChanges.rinneganBase = JutsuEntry.local. rinneganBase;
+
+                foreach (KeyValuePair<System.Type,SkillData> pair in SkillCatalog.allSkills)
+                {
+                    Debug.Log("Key: " + pair.Key);
+                }
+
+                Player.local.creature.container.RemoveContent("RinneganInit");
             }
             foreach (var renderer in creature.renderers)
             {
                 if (renderer.renderer.name.Equals("Eyes_LOD0"))
                 {
-                    JutsuEntry.local.originalEyeColorMaterial = renderer.renderer.material.DeepCopyByExpressionTree();
                     Material original = renderer.renderer.materials[0].DeepCopyByExpressionTree();
-                    Debug.Log(original.GetTexturePropertyNames().ToString());
+                    //Debug.Log(original.GetTexturePropertyNames().ToString());
+                    Debug.Log("Renderers Count: " + renderer.renderer.materials.Length);
+                    foreach (var name in original.GetTexturePropertyNames())
+                    {
+                        Debug.Log("Material Names " + name);    
+                    }
                     JutsuEntry.local._lerpMaterialChanges.defaultColor = original.DeepCopyByExpressionTree();
+                    JutsuEntry.local._lerpMaterialChanges.defaultNormalMap = (Texture2D) original.GetTexture("_BumpMap");
+                    JutsuEntry.local._lerpMaterialChanges.defaultMetallic = (Texture2D) original.GetTexture("_MetallicGlossMap");
                     JutsuEntry.local._lerpMaterialChanges.lerpMaterial.SetTexture("_OriginalTexture", original.GetTexture("_BaseMap").DeepCopyByExpressionTree());
+                    JutsuEntry.local._lerpMaterialChanges.lerpMaterial.SetTexture("_normalOriginal", JutsuEntry.local._lerpMaterialChanges.defaultNormalMap);
+                    JutsuEntry.local._lerpMaterialChanges.lerpMaterial.SetTexture("_metallicOriginal", JutsuEntry.local._lerpMaterialChanges.defaultMetallic);
                     JutsuEntry.local._lerpMaterialChanges.lerpMaterial.SetFloat("_transition", 0f);
                     renderer.renderer.material = JutsuEntry.local._lerpMaterialChanges.lerpMaterial;
                 }

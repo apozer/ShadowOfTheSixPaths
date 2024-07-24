@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Speech.Recognition;
 using System.Threading.Tasks;
 using ThunderRoad;
+using ThunderRoad.DebugViz;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -82,7 +83,7 @@ namespace Jutsu
         //Tracking Eye Materials
         internal string lastActive = "";
         private string currentlyActive = "";
-        public Material originalEyeColorMaterial;
+       
         public override void OnCatalogRefresh()
         {
             //Only want one instance of the loader running
@@ -236,7 +237,11 @@ namespace Jutsu
         public Texture2D sharinganBase;
         public Texture2D rinneganBase;
         public Material defaultColor;
+        public Texture2D defaultNormalMap;
+        public Texture2D defaultMetallic;
+        public Texture2D defaultEmission;
         private JutsuEntry.EyeMaterialState lastState = JutsuEntry.EyeMaterialState.NotActive;
+        internal SkillData rinneganData;
 
         public void Execute(string lastActive, string nextActive)
         {
@@ -271,6 +276,10 @@ namespace Jutsu
             Debug.Log("Textures adding");
             lerpMaterial.SetFloat("_transition", 0f);
             lerpMaterial.SetTexture("_OriginalTexture", texture1);
+            lerpMaterial.SetTexture("_normalOriginal", defaultNormalMap);
+            lerpMaterial.SetTexture("_metallicOriginal", defaultMetallic);
+            lerpMaterial.SetTexture("_normalSharingan", defaultNormalMap);
+            lerpMaterial.SetTexture("_metallicSharingan", defaultMetallic);
             lerpMaterial.SetTexture("_sharinganTexture", texture2);
             Debug.Log("Textures added");
             GameManager.local.StartCoroutine(TransitionEyeMaterial());
@@ -321,10 +330,6 @@ namespace Jutsu
         }
         private void Update()
         {
-            Debug.Log("Jutsu Entry last state: " + JutsuEntry.local.state);
-            Debug.Log("Jutsu Entry transition: " + JutsuEntry.local.transitionActive);
-            Debug.Log("Local last state: " + lastState);
-            Debug.Log("Default color: " + defaultColor);
             if (!JutsuEntry.local.transitionActive  && lastState != JutsuEntry.local.state && defaultColor)
             {
                 Debug.Log("Checked into update method in LerpMaterialChanges");
@@ -332,6 +337,7 @@ namespace Jutsu
                 {
                     case JutsuEntry.EyeMaterialState.Disabled:
                         Execute(GetLastActive(), "");
+                        Player.local.creature.container.RemoveContent("RinneganInit");
                         lastState = JutsuEntry.EyeMaterialState.Disabled;
                         JutsuEntry.local.lastActive = "";
                         break;
@@ -343,6 +349,7 @@ namespace Jutsu
                     case JutsuEntry.EyeMaterialState.Rinnegan:
                         Execute(GetLastActive(), "rinnayganBase");
                         lastState = JutsuEntry.EyeMaterialState.Rinnegan;
+                        Player.local.creature.container.AddSkillContent("RinneganInit");
                         JutsuEntry.local.lastActive = "rinnayganBase";
                         break;
                 }
