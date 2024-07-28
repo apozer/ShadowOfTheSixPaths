@@ -72,9 +72,12 @@ namespace Jutsu
         public GameObject shadowShurikenJutsu;
 
 
+        //Amaterasu VFX
+        internal GameObject amaterasuVFX;
         public Material lerpMaterial;
         //Sharingan Eye Materials
         public Texture2D threeTomoeSharingan;
+        public Texture2D sasukeMangekyoSharingan;
         
         //Rinnegan Eye Materials
         public Texture2D rinneganBase;
@@ -83,6 +86,11 @@ namespace Jutsu
         //Tracking Eye Materials
         internal string lastActive = "";
         private string currentlyActive = "";
+        
+        //Sharingan SFX
+        public GameObject mangekyoSFX;
+
+        public Item activeChidori;
        
         public override void OnCatalogRefresh()
         {
@@ -90,7 +98,12 @@ namespace Jutsu
             if (local != null) return;
             local = this;
             AsyncSetup();
-            
+            var limbEffect = (EffectModuleParticle) Catalog.GetData<EffectData>("AmaterasuBurningLimbs").modules[0];
+            var bodyEffect = (EffectModuleParticle) Catalog.GetData<EffectData>("AmaterasuBurningTorso").modules[0];
+            limbEffect.mainColorStart = new Color(0, 0, 0, 1);
+            limbEffect.mainColorEnd= new Color(0, 0, 0, 1);
+            bodyEffect.mainColorStart = new Color(0, 0, 0, 1);
+            bodyEffect.mainColorEnd= new Color(0, 0, 0, 1);
         }
 
         internal GameObject lerpReferenceGO = new GameObject();
@@ -147,11 +160,22 @@ namespace Jutsu
                 threeTomoeSharingan = obj;
             }, "Three Tomoe Sharingan");
             
+            Catalog.LoadAssetAsync<Texture2D>("SOTSP.Jutsu.Sharingan.Mangekyo.Sasuke",
+                obj => { sasukeMangekyoSharingan = obj; Debug.Log("Mangekyo is: " + sasukeMangekyoSharingan);}, "SasukeMangekyoSharingan");
+            
             //Rinnegan Eye Materials
             Catalog.LoadAssetAsync<Texture2D>("SOTSP.Jutsu.Rinnegan.BaseRinnegan.Texture", obj =>
             {
                 rinneganBase = obj;
             }, "Rinnegan");
+            
+            //Amaterasu VXF
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.MangekyoSharingan.Amaterasu.VFX", obj =>
+            {
+                amaterasuVFX = obj;
+            }, "AmaterasuVFX");
+            
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Mangekyo.SFX", obj => { mangekyoSFX = obj;}, "MangekyoSFX");
             return base.LoadAddressableAssetsCoroutine();
         }
 
@@ -166,6 +190,7 @@ namespace Jutsu
                 _lerpMaterialChanges.sharinganBase = threeTomoeSharingan;
                 _lerpMaterialChanges.lerpMaterial = this.lerpMaterial;
                 _lerpMaterialChanges.rinneganBase = rinneganBase;
+                _lerpMaterialChanges.sasukeMangekyoSharingan = sasukeMangekyoSharingan;
                 Debug.Log("Setting lerp changes");
                 SequenceManagement();
                 //Prevents game from getting hung up when using speech recognition engine.
@@ -174,6 +199,7 @@ namespace Jutsu
                 sharinganOptions.Add("Sharingan");
                 sharinganOptions.Add("Rinnaygan");
                 sharinganOptions.Add("Disable");
+                sharinganOptions.Add("Mangekyo Sharingan");
                 recognizer = new SpeechRecognitionEngine();
                 Grammar servicesGrammar = new Grammar(new GrammarBuilder(sharinganOptions));
                 recognizer.RequestRecognizerUpdate();
@@ -189,6 +215,7 @@ namespace Jutsu
             NotActive,
             Disabled,
             Sharingan,
+            MangekyoSharingan,
             Rinnegan
         }
         
@@ -196,10 +223,8 @@ namespace Jutsu
         {
                 Debug.Log(e.Result.Text);
                 if (e.Result.Confidence < 0.93f) return;
-                if (!transitionActive)
+                if (!transitionActive && !Player.local.creature.isKilled)
                 {
-                    Debug.Log("Lepr Material Changes: " + _lerpMaterialChanges);
-                    Debug.Log("Last active in async: " + lastActive);
                     if (lastActive.ToLower().Contains(e.Result.Text.ToLower())) return;
 
                     if (e.Result.Text.ToLower().Equals("disable"))
@@ -208,8 +233,11 @@ namespace Jutsu
                     }
                     if (e.Result.Text.ToLower().Equals("sharingan"))
                     {
-                        Debug.Log("last active: " + lastActive);
                         state = EyeMaterialState.Sharingan;
+                    }
+                    if (e.Result.Text.ToLower().Equals("mangekyo sharingan"))
+                    {
+                        state = EyeMaterialState.MangekyoSharingan;
                     }
                     if (e.Result.Text.ToLower().Equals("rinnaygan"))
                     {
@@ -235,6 +263,7 @@ namespace Jutsu
     {
         public Material lerpMaterial;
         public Texture2D sharinganBase;
+        public Texture2D sasukeMangekyoSharingan;
         public Texture2D rinneganBase;
         public Material defaultColor;
         public Texture2D defaultNormalMap;
@@ -242,15 +271,12 @@ namespace Jutsu
         public Texture2D defaultEmission;
         private JutsuEntry.EyeMaterialState lastState = JutsuEntry.EyeMaterialState.NotActive;
         internal SkillData rinneganData;
+        private AudioSource mangekyoSound;
+
+        internal static  List<string> activeDojutsuSkills = new List<string>();
 
         public void Execute(string lastActive, string nextActive)
         {
-            Debug.Log("Executing code");
-            
-            Debug.Log("Thing 1 is: " + sharinganBase);
-            Debug.Log("Thing 2 is: " + rinneganBase);
-            Debug.Log("Thing 1 is: " + GetTransitionStart(lastActive));
-            Debug.Log("Thing 2 is: " + GetTransitionStart(nextActive));
             SetMaterialData(GetTransitionStart(lastActive), GetTransitionStart(nextActive));
         }
         
@@ -264,6 +290,8 @@ namespace Jutsu
                 case "sharinganBase":
                     Debug.Log(sharinganBase);
                     return sharinganBase;
+                case "mangekyoSharingan":
+                    return sasukeMangekyoSharingan;
                 case "rinnayganBase":
                     return rinneganBase;
                 default:
@@ -287,7 +315,6 @@ namespace Jutsu
         
         public IEnumerator TransitionEyeMaterial()
         {
-            Debug.Log("Hit the coroutine");
             bool active = true;
             while (active)
             {
@@ -302,7 +329,6 @@ namespace Jutsu
                 {
                     JutsuEntry.local.transitionActive = false;
                     lerpMaterial.SetFloat("_transition", 1f);
-                    Debug.Log("ended transitions");
                     active = false;
                 }
 
@@ -311,6 +337,7 @@ namespace Jutsu
         }
 
         private bool stateChanged;
+        
 
         string GetLastActive()
         {
@@ -322,34 +349,94 @@ namespace Jutsu
                     return "";
                 case JutsuEntry.EyeMaterialState.Sharingan:
                     return "sharinganBase";
+                case JutsuEntry.EyeMaterialState.MangekyoSharingan:
+                    return "mangekyoSharingan";
                 case JutsuEntry.EyeMaterialState.Rinnegan:
                     return "rinnayganBase";
                 default:
                     return "";
             }
         }
+
+        static void DisableActiveDojutsu()
+        {
+            if (activeDojutsuSkills.Count < 1) return;
+            foreach (var reference in activeDojutsuSkills)
+            {
+                Player.local.creature.container.RemoveContent(reference);
+            }
+
+            activeDojutsuSkills.RemoveAll(data => data.GetType() is string);
+            activeDojutsuSkills.TrimExcess();
+        }
+
+        private List<string> sasukeMangekyo = new List<string>{"Amaterasu"};
+        private List<string> rinnegan = new List<string>{"RinneganInit"};
+        List<string> SelectedActiveDojutsu(string type)
+        {
+            switch (type)
+            {
+                case "Sharingan":
+                    break;
+                case "SasukeMangekyo":
+                    return sasukeMangekyo;
+                case "Rinnegan":
+                    return rinnegan;
+                default:
+                    return null;
+            }
+
+            return null;
+        }
+
+        void ActivateDojustu(List<string> toActivate)
+        {
+            foreach (var skill in toActivate)
+            {
+                if (skill.Contains("Init")) Player.local.creature.container.AddSpellContent(skill);
+                else  Player.local.creature.container.AddSkillContent(skill);
+                activeDojutsuSkills.Add(skill);
+            }
+        }
         private void Update()
         {
             if (!JutsuEntry.local.transitionActive  && lastState != JutsuEntry.local.state && defaultColor)
             {
-                Debug.Log("Checked into update method in LerpMaterialChanges");
+                Debug.Log("Looping constantly");
                 switch (JutsuEntry.local.state)
                 {
                     case JutsuEntry.EyeMaterialState.Disabled:
+                        DisableActiveDojutsu();
                         Execute(GetLastActive(), "");
-                        Player.local.creature.container.RemoveContent("RinneganInit");
                         lastState = JutsuEntry.EyeMaterialState.Disabled;
                         JutsuEntry.local.lastActive = "";
                         break;
                     case JutsuEntry.EyeMaterialState.Sharingan:
+                        DisableActiveDojutsu();
                         Execute(GetLastActive(), "sharinganBase");
                         lastState = JutsuEntry.EyeMaterialState.Sharingan;
                         JutsuEntry.local.lastActive = "sharinganBase";
                         break;
+                    case JutsuEntry.EyeMaterialState.MangekyoSharingan:
+                        DisableActiveDojutsu();
+                        ActivateDojustu(SelectedActiveDojutsu("SasukeMangekyo"));
+                        if (!mangekyoSound)
+                        {
+                            var reference = Instantiate(JutsuEntry.local.mangekyoSFX);
+                            mangekyoSound = reference.gameObject.GetComponent<AudioSource>();
+                            mangekyoSound.transform.position = Player.local.head.transform.position;
+                            mangekyoSound.transform.parent = Player.local.head.transform;
+                        }
+                        else mangekyoSound.Play();
+                        Execute(GetLastActive(), "mangekyoSharingan");
+                        lastState = JutsuEntry.EyeMaterialState.MangekyoSharingan;
+                        JutsuEntry.local.lastActive = "mangekyoSharingan";
+                        break;
                     case JutsuEntry.EyeMaterialState.Rinnegan:
+                        DisableActiveDojutsu();
+                        ActivateDojustu(SelectedActiveDojutsu("Rinnegan"));
                         Execute(GetLastActive(), "rinnayganBase");
                         lastState = JutsuEntry.EyeMaterialState.Rinnegan;
-                        Player.local.creature.container.AddSkillContent("RinneganInit");
                         JutsuEntry.local.lastActive = "rinnayganBase";
                         break;
                 }

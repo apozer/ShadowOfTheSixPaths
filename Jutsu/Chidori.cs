@@ -111,6 +111,7 @@ namespace Jutsu
                                 chidoriLoop = GameObject.Instantiate(JutsuEntry.local.chidoriLoopSFX);
                                 chidoriLoopSFX = chidoriLoop.GetComponent<AudioSource>();
                                 chidoriVFX.Stop();
+                                JutsuEntry.local.activeChidori = chidori;
                             });
                         }
                         else
@@ -122,8 +123,6 @@ namespace Jutsu
 
                     else if(chidori)
                     {
-                        Debug.Log("Piercable size: " + piercable.Count);
-                        Debug.Log("Current count: " + currentCount);
                         if (piercable.Count != currentCount)
                         {
                             foreach (Creature c in piercable)
@@ -210,6 +209,7 @@ namespace Jutsu
                             }
                         }
                         chidori.Despawn();
+                        JutsuEntry.local.activeChidori = null;
                         SetJutsuTimerActivated(false);
                         ResetAllRootsExcludingThis();
                     }

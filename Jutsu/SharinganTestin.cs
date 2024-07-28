@@ -41,26 +41,15 @@ namespace Jutsu
                 JutsuEntry.local._lerpMaterialChanges = new GameObject().AddComponent<LerpMaterialChanges>();
                 JutsuEntry.local._lerpMaterialChanges.sharinganBase =  JutsuEntry.local.threeTomoeSharingan;
                 JutsuEntry.local._lerpMaterialChanges.lerpMaterial =  JutsuEntry.local.lerpMaterial;
-                JutsuEntry.local._lerpMaterialChanges.rinneganBase = JutsuEntry.local. rinneganBase;
-
-                foreach (KeyValuePair<System.Type,SkillData> pair in SkillCatalog.allSkills)
-                {
-                    Debug.Log("Key: " + pair.Key);
-                }
-
-                Player.local.creature.container.RemoveContent("RinneganInit");
+                JutsuEntry.local._lerpMaterialChanges.rinneganBase = JutsuEntry.local.rinneganBase;
+                JutsuEntry.local._lerpMaterialChanges.sasukeMangekyoSharingan =
+                    JutsuEntry.local.sasukeMangekyoSharingan;
             }
             foreach (var renderer in creature.renderers)
             {
                 if (renderer.renderer.name.Equals("Eyes_LOD0"))
                 {
                     Material original = renderer.renderer.materials[0].DeepCopyByExpressionTree();
-                    //Debug.Log(original.GetTexturePropertyNames().ToString());
-                    Debug.Log("Renderers Count: " + renderer.renderer.materials.Length);
-                    foreach (var name in original.GetTexturePropertyNames())
-                    {
-                        Debug.Log("Material Names " + name);    
-                    }
                     JutsuEntry.local._lerpMaterialChanges.defaultColor = original.DeepCopyByExpressionTree();
                     JutsuEntry.local._lerpMaterialChanges.defaultNormalMap = (Texture2D) original.GetTexture("_BumpMap");
                     JutsuEntry.local._lerpMaterialChanges.defaultMetallic = (Texture2D) original.GetTexture("_MetallicGlossMap");

@@ -76,6 +76,9 @@
         <Reference Include="UnityEngine.CoreModule">
           <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.ParticleSystemModule">
+          <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.PhysicsModule">
           <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
         </Reference>
@@ -115,8 +118,11 @@
         <Compile Include="ShadowPossessionController.cs" />
         <Compile Include="ShadowPossessionJutsu.cs" />
         <Compile Include="SharinganTestin.cs" />
+        <Compile Include="Sharingan\AmaterasuBurn.cs" />
+        <Compile Include="Sharingan\AmaterasuSkill.cs" />
         <Compile Include="SharkBombItem.cs" />
         <Compile Include="ShurikenRotate.cs" />
+        <Compile Include="SpellCastAmaterasu.cs" />
         <Compile Include="SpellCastChakra.cs" />
         <Compile Include="SubstitutionJutsu.cs" />
         <Compile Include="WaterCloneActive.cs" />
