@@ -15,7 +15,6 @@ namespace Jutsu
         private AudioSource mangekyoSound;
         internal override void CustomStartData()
         {
-            Debug.Log("Adding amaterasu");
             _speechRecognizer = new SpeechRecognitionEngine();
             Choices amaterasu = new Choices();
             amaterasu.Add("Amaterasu");
@@ -50,7 +49,6 @@ namespace Jutsu
             {
                 if (activateAmaterasu)
                 {
-                    Debug.Log("Activated Amaeterasu ability");
                     RaycastHit hit;
                     activateAmaterasu = false;
                     if (Physics.Raycast(Player.local.head.transform.position, Player.local.head.transform.forward, out hit,float.MaxValue, Physics.DefaultRaycastLayers,
@@ -136,10 +134,8 @@ namespace Jutsu
                             {
                                 if (JutsuEntry.local.activeChidori)
                                 {
-                                    Debug.Log("Activated Chidori is here");
                                     ParticleSystem ps = JutsuEntry.local.activeChidori.gameObject.transform
                                         .GetComponentInChildren<ParticleSystem>();
-                                    Debug.Log(ps);
                                     ps.Play();
                                     var trigger = JutsuEntry.local.activeChidori.gameObject.transform.FindChildRecursiveTR(
                                         "AmaterasuTrigger");

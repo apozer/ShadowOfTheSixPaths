@@ -161,7 +161,7 @@ namespace Jutsu
             }, "Three Tomoe Sharingan");
             
             Catalog.LoadAssetAsync<Texture2D>("SOTSP.Jutsu.Sharingan.Mangekyo.Sasuke",
-                obj => { sasukeMangekyoSharingan = obj; Debug.Log("Mangekyo is: " + sasukeMangekyoSharingan);}, "SasukeMangekyoSharingan");
+                obj => { sasukeMangekyoSharingan = obj;}, "SasukeMangekyoSharingan");
             
             //Rinnegan Eye Materials
             Catalog.LoadAssetAsync<Texture2D>("SOTSP.Jutsu.Rinnegan.BaseRinnegan.Texture", obj =>
@@ -191,7 +191,6 @@ namespace Jutsu
                 _lerpMaterialChanges.lerpMaterial = this.lerpMaterial;
                 _lerpMaterialChanges.rinneganBase = rinneganBase;
                 _lerpMaterialChanges.sasukeMangekyoSharingan = sasukeMangekyoSharingan;
-                Debug.Log("Setting lerp changes");
                 SequenceManagement();
                 //Prevents game from getting hung up when using speech recognition engine.
                 Application.quitting += () => Process.GetCurrentProcess().Kill();
@@ -285,10 +284,8 @@ namespace Jutsu
             switch (lastActive)
             {
                 case "":
-                    Debug.Log(defaultColor);
                     return defaultColor.GetTexture("_BaseMap");
                 case "sharinganBase":
-                    Debug.Log(sharinganBase);
                     return sharinganBase;
                 case "mangekyoSharingan":
                     return sasukeMangekyoSharingan;
@@ -300,8 +297,6 @@ namespace Jutsu
         }
         public void SetMaterialData(Texture texture1, Texture texture2)
         {
-            
-            Debug.Log("Textures adding");
             lerpMaterial.SetFloat("_transition", 0f);
             lerpMaterial.SetTexture("_OriginalTexture", texture1);
             lerpMaterial.SetTexture("_normalOriginal", defaultNormalMap);
@@ -309,7 +304,6 @@ namespace Jutsu
             lerpMaterial.SetTexture("_normalSharingan", defaultNormalMap);
             lerpMaterial.SetTexture("_metallicSharingan", defaultMetallic);
             lerpMaterial.SetTexture("_sharinganTexture", texture2);
-            Debug.Log("Textures added");
             GameManager.local.StartCoroutine(TransitionEyeMaterial());
         }
         
@@ -402,7 +396,6 @@ namespace Jutsu
         {
             if (!JutsuEntry.local.transitionActive  && lastState != JutsuEntry.local.state && defaultColor)
             {
-                Debug.Log("Looping constantly");
                 switch (JutsuEntry.local.state)
                 {
                     case JutsuEntry.EyeMaterialState.Disabled:
