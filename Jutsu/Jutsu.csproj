@@ -120,6 +120,9 @@
         <Compile Include="SharinganTestin.cs" />
         <Compile Include="Sharingan\AmaterasuBurn.cs" />
         <Compile Include="Sharingan\AmaterasuSkill.cs" />
+        <Compile Include="Sharingan\Kamui\Attractor.cs" />
+        <Compile Include="Sharingan\Kamui\KamuiSkill.cs" />
+        <Compile Include="Sharingan\Kamui\ReduceSizeOverTime.cs" />
         <Compile Include="SharkBombItem.cs" />
         <Compile Include="ShurikenRotate.cs" />
         <Compile Include="SpellCastAmaterasu.cs" />

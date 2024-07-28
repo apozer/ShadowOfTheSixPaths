@@ -87,6 +87,9 @@ namespace Jutsu
         internal string lastActive = "";
         private string currentlyActive = "";
         
+        
+        //Kamui
+        public GameObject kamuiVFX;
         //Sharingan SFX
         public GameObject mangekyoSFX;
 
@@ -176,6 +179,8 @@ namespace Jutsu
             }, "AmaterasuVFX");
             
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Mangekyo.SFX", obj => { mangekyoSFX = obj;}, "MangekyoSFX");
+            
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.MangekyoSharingan.Kamui.VFX", obj => { kamuiVFX = obj;}, "KamuiVFX");
             return base.LoadAddressableAssetsCoroutine();
         }
 
