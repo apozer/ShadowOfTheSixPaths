@@ -94,7 +94,6 @@
         <Compile Include="ChakraReceiver.cs" />
         <Compile Include="Chidori.cs" />
         <Compile Include="ClonePlayer.cs" />
-        <Compile Include="CoroutineManager.cs" />
         <Compile Include="Despawn.cs" />
         <Compile Include="FlameFollow.cs" />
         <Compile Include="FlyingRaijin.cs" />
@@ -117,12 +116,17 @@
         <Compile Include="ShadowCloneJutsu.cs" />
         <Compile Include="ShadowPossessionController.cs" />
         <Compile Include="ShadowPossessionJutsu.cs" />
-        <Compile Include="SharinganTestin.cs" />
         <Compile Include="Sharingan\AmaterasuBurn.cs" />
         <Compile Include="Sharingan\AmaterasuSkill.cs" />
+        <Compile Include="Sharingan\DojutsuTracking.cs" />
+        <Compile Include="Sharingan\KamuiSharinganSkill.cs" />
         <Compile Include="Sharingan\Kamui\Attractor.cs" />
         <Compile Include="Sharingan\Kamui\KamuiSkill.cs" />
+        <Compile Include="Sharingan\Kamui\MangekyoMapper.cs" />
         <Compile Include="Sharingan\Kamui\ReduceSizeOverTime.cs" />
+        <Compile Include="Sharingan\MangekyoTracker.cs" />
+        <Compile Include="Sharingan\SasukeSharinganSkill.cs" />
+        <Compile Include="Sharingan\SharinganSkills.cs" />
         <Compile Include="SharkBombItem.cs" />
         <Compile Include="ShurikenRotate.cs" />
         <Compile Include="SpellCastAmaterasu.cs" />

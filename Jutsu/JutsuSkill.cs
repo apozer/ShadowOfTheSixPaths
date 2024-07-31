@@ -97,7 +97,7 @@ namespace Jutsu
         {
             base.OnSkillUnloaded(skillData, creature);
             CustomEndData();
-            GameManager.local.StopCoroutine(this.activeJutsuCoroutine);
+            if(this.activeJutsuCoroutine != null) GameManager.local.StopCoroutine(this.activeJutsuCoroutine);
         }
 
         internal virtual IEnumerator JutsuStart()

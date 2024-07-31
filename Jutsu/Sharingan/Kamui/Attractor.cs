@@ -15,17 +15,13 @@ namespace Jutsu.Kamui
 
         void Update() {
 
-            if (mainAttractor != null) {
-                Debug.Log("Main attractor is not null");
+            if (mainAttractor != null && rb != null) {
                 if (mainAttractor && attractorOn)
                 {
-                    Debug.Log("Main attractor is true");
                     if (foundAttractors != null)
                     {
-                        Debug.Log("foundAttractors is not null");
                         foreach (Attractor attractor in foundAttractors)
                         {
-                            Debug.Log("Attracting");
                             Attract(attractor);
                             if (attractor.gameObject.GetComponent<ReduceSizeOverTime>() == null && attractor != this)
                             {

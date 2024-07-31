@@ -9,6 +9,7 @@ namespace Jutsu.Kamui
     public class KamuiSkill : JutsuSkill
     {
         GameObject kamui;
+        private GameObject kamuiRef;
         Collider[] colliderObjects;
         List<Creature> colliderCreature = new List<Creature>();
         List<Attractor> attractors = new List<Attractor>();
@@ -29,9 +30,9 @@ namespace Jutsu.Kamui
             distortionAmount = 0f;
             kamui = JutsuEntry.local.kamuiVFX;
             _speechRecognizer = new SpeechRecognitionEngine();
-            Choices amaterasu = new Choices();
-            amaterasu.Add("Amaterasu");
-            Grammar servicesGrammar = new Grammar(new GrammarBuilder(amaterasu));
+            Choices kamuiChoice = new Choices();
+            kamuiChoice.Add("Kamui");
+            Grammar servicesGrammar = new Grammar(new GrammarBuilder(kamuiChoice));
             _speechRecognizer.RequestRecognizerUpdate();
             _speechRecognizer.LoadGrammarAsync(servicesGrammar);
             _speechRecognizer.SetInputToDefaultAudioDevice();
@@ -39,11 +40,18 @@ namespace Jutsu.Kamui
             _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
         }
 
+        public override void OnSkillUnloaded(SkillData skillData, Creature creature)
+        {
+            GameObject.Destroy(kamui);
+            base.OnSkillUnloaded(skillData, creature);
+        }
+
         private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             if (e.Result.Confidence > 0.93f)
             {
-                if (e.Result.Text == "Amaterasu")
+                Debug.Log(e.Result.Text);
+                if (e.Result.Text == "Kamui")
                 {
                     activateKamui = true;
                 }
@@ -54,15 +62,20 @@ namespace Jutsu.Kamui
         {
             while (true)
             {
-                if (activateKamui)
+                if (activateKamui && kamuiRef == null)
                 {
+                    SetTimer();
                     attractorOn = false;
                     startDestroy = false;
                     bool stopChecking = false;
-                    activateKamui = false;
-                    var kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
-                    var attractor = kamuiRef.gameObject.AddComponent<Attractor>();
-                    GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, attractor, attractorOn, startDestroy, stopChecking));
+                    activateKamui = false; 
+                    kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
+                    kamuiRef.transform.position = Player.local.head.transform.position + (Player.local.head.transform.forward * 8f);
+                    kamuiRef.transform.LookAt(Player.local.head.transform);
+                    thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
+                    thisAttractor.rb = kamui.gameObject.GetComponentInChildren<Rigidbody>();
+                    thisAttractor.mainAttractor = true;
+                    GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
                 }
                 yield return null;
             }
@@ -76,32 +89,33 @@ namespace Jutsu.Kamui
                 if (distortionAmount < 1 && !destroy) {
 
                     distortionAmount += 0.01f;
-                    foreach (Material mat in kamui.gameObject.GetComponent<MeshRenderer>().materials) {
+                    foreach (Material mat in kamui.GetComponentInChildren<MeshRenderer>().materials) {
+                        Debug.Log(mat);
                         mat.SetFloat("_distortionAmount",distortionAmount);
                     }
                 }
-                    
-                float distance = Vector3.Distance(Player.local.creature.transform.position, kamui.transform.position);
             
-                if (distance > 7f && !stopChecking) {
-
-                    kamui.GetComponent<Rigidbody>().isKinematic = true;
+                if (!stopChecking) {
+                    
+                    kamui.GetComponentInChildren<Rigidbody>().isKinematic = true;
                     attractor.attractorOn = true;
                     stopChecking = true;
 
-                    colliderObjects = Physics.OverlapSphere(kamui.transform.position, 4f);
+                    colliderObjects = Physics.OverlapSphere(kamui.transform.position, 8f);
                     var colliderItems = FindAttractors(colliderObjects);
                     CreateAttractors(colliderItems);
                     attractor.SetFoundAttractor(attractors);
 
                 }
 
-                if (startDestroy) {
-
-                    if (distortionAmount > 0.01f) {
+                if (startDestroy)
+                {
+                    destroy = true;
+                    if (distortionAmount > 0.001f) {
                         distortionAmount -= 0.01f;
-                        foreach (Material mat in kamui.gameObject.GetComponent<MeshRenderer>().materials)
+                        foreach (Material mat in kamui.GetComponentInChildren<MeshRenderer>().materials)
                         {
+                            Debug.Log("distortion: " + distortionAmount);
                             mat.SetFloat("_distortionAmount", distortionAmount);
                         }
                     }
@@ -128,18 +142,22 @@ namespace Jutsu.Kamui
                 foreach (Collider collider in colliderObjects)
                 {
 
-                    if (collider.gameObject.GetComponentInParent<Item>() != null)
+                    if (collider.gameObject.GetComponentInParent<Item>() is Item item)
                     {
-                        if (!colliderItems.Contains(collider.gameObject.GetComponentInParent<Item>()))
+                        Item sideLeft = Player.local.creature?.equipment?.GetHeldItem(Side.Left);
+                        Item sideRight = Player.local.creature?.equipment?.GetHeldItem(Side.Right);
+                        List<Item> holstered = Player.local.creature.equipment.GetAllHolsteredItems();
+                        if ((sideLeft && !sideLeft.Equals(item)) || (sideRight && !sideRight.Equals(item)) || (holstered != null && !holstered.Contains(item)))
                         {
+                            if (!colliderItems.Contains(collider.gameObject.GetComponentInParent<Item>()))
+                            {
 
-                            colliderItems.Add(collider.gameObject.GetComponentInParent<Item>());
+                                colliderItems.Add(collider.gameObject.GetComponentInParent<Item>());
 
+                            }
                         }
-
                     }
-
-                   else if (collider.gameObject.GetComponentInParent<Creature>() != null) {
+                   else if (collider.gameObject.GetComponentInParent<Creature>() is Creature creature && !creature.isPlayer) {
                         
                         if (!colliderCreature.Contains(collider.gameObject.GetComponentInParent<Creature>()))
                         {
