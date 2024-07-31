@@ -116,8 +116,8 @@
         <Compile Include="ShadowCloneJutsu.cs" />
         <Compile Include="ShadowPossessionController.cs" />
         <Compile Include="ShadowPossessionJutsu.cs" />
-        <Compile Include="Sharingan\AmaterasuBurn.cs" />
-        <Compile Include="Sharingan\AmaterasuSkill.cs" />
+        <Compile Include="Sharingan\Amaterasu\AmaterasuBurn.cs" />
+        <Compile Include="Sharingan\Amaterasu\AmaterasuSkill.cs" />
         <Compile Include="Sharingan\DojutsuTracking.cs" />
         <Compile Include="Sharingan\KamuiSharinganSkill.cs" />
         <Compile Include="Sharingan\Kamui\Attractor.cs" />

@@ -11,7 +11,6 @@ namespace Jutsu
     {
         private SpeechRecognitionEngine _speechRecognizer;
         private bool activateAmaterasu;
-        private GameObject vfx;
         private AudioSource mangekyoSound;
         internal override void CustomStartData()
         {
@@ -155,8 +154,8 @@ namespace Jutsu
                             else
                             {
                                 Vector3 position = hit.point;
-                                vfx = GameObject.Instantiate(JutsuEntry.local.amaterasuVFX.DeepCopyByExpressionTree());
-                                vfx.gameObject.AddComponent<AmaterasuBurn>();
+                                var vfx = GameObject.Instantiate(JutsuEntry.local.amaterasuVFX.DeepCopyByExpressionTree());
+                                vfx.AddComponent<AmaterasuBurn>();
                                 vfx.transform.position = position;
                                 if (!mangekyoSound)
                                 {
@@ -166,12 +165,23 @@ namespace Jutsu
                                     mangekyoSound.transform.parent = Player.local.head.transform;
                                 }
                                 else mangekyoSound.Play();
+
+                                GameManager.local.StartCoroutine(AmaterasuTimer(vfx));
                             }
                         }
                     }
                 }
                 yield return null;
             }
+        }
+
+
+        IEnumerator AmaterasuTimer(GameObject reference)
+        {
+            yield return new WaitForSeconds(10f);
+            reference.GetComponent<ParticleSystem>().Stop();
+            yield return new WaitForSeconds(2f);
+            GameObject.Destroy(reference);
         }
     }
 }

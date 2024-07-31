@@ -38,7 +38,7 @@ namespace Jutsu
         public bool transitionActive = false;
         public string lastActive = "";
         public bool mangekyoActivated = false;
-        public bool devMode = false;
+        public bool devMode = true;
         
         public delegate void MangekyoActive();
 
@@ -138,7 +138,7 @@ namespace Jutsu
                                 }
                             };
                         }
-                        else if(devMode) playerSpawned.creature.container.AddSkillContent("KamuiSharinganSkills");
+                        else if(devMode) playerSpawned.creature.container.AddSkillContent("SasukeSharinganSkills");
 
                     }
                     raceInstantiated = true;
