@@ -48,7 +48,7 @@ namespace Jutsu.Kamui
 
         private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Confidence > 0.93f)
+            if (e.Result.Confidence > 0.93f && !kamuiRef)
             {
                 Debug.Log(e.Result.Text);
                 if (e.Result.Text == "Kamui")
