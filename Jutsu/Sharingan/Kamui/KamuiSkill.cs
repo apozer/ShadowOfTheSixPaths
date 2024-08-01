@@ -69,14 +69,35 @@ namespace Jutsu.Kamui
                     startDestroy = false;
                     bool stopChecking = false;
                     activateKamui = false; 
-                    kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
-                    kamuiRef.transform.position = Player.local.head.transform.position + (Player.local.head.transform.forward * 8f);
-                    kamuiRef.transform.LookAt(Player.local.head.transform);
-                    thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
-                    thisAttractor.rb = kamuiRef.gameObject.GetComponentInChildren<Rigidbody>();
-                    thisAttractor.rb.transform.position = kamuiRef.transform.position;
-                    thisAttractor.mainAttractor = true;
-                    GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
+                    if (Physics.Raycast(Player.local.head.transform.position, Player.local.head.transform.forward,
+                            out RaycastHit hit, 8f, Physics.DefaultRaycastLayers,
+                            QueryTriggerInteraction.Ignore))
+                    {
+                        if (hit.collider != null)
+                        {
+                            
+                            kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
+                            kamuiRef.transform.position = hit.point - (hit.point - Player.local.head.transform.position).normalized * 1f;
+                            kamuiRef.transform.LookAt(Player.local.head.transform);
+                            thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
+                            thisAttractor.rb = kamuiRef.gameObject.GetComponentInChildren<Rigidbody>();
+                            thisAttractor.rb.transform.position = kamuiRef.transform.position;
+                            thisAttractor.mainAttractor = true;
+                            GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
+                        }
+                        else
+                        {
+                        
+                            kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
+                            kamuiRef.transform.position = Player.local.head.transform.position + (Player.local.head.transform.forward * 8f);
+                            kamuiRef.transform.LookAt(Player.local.head.transform);
+                            thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
+                            thisAttractor.rb = kamuiRef.gameObject.GetComponentInChildren<Rigidbody>();
+                            thisAttractor.rb.transform.position = kamuiRef.transform.position;
+                            thisAttractor.mainAttractor = true;
+                            GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
+                        }
+                    }
                 }
                 yield return null;
             }
