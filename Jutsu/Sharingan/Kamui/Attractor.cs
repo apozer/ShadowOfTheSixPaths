@@ -20,13 +20,24 @@ namespace Jutsu.Kamui
                 {
                     if (foundAttractors != null)
                     {
-                        foreach (Attractor attractor in foundAttractors)
+                        for (int i = 0; i < foundAttractors.Count;i++)
                         {
+                            if (!foundAttractors[i])
+                            {
+                                foundAttractors.RemoveAt(i);
+                                foundAttractors.TrimExcess();
+                                i -= 1;
+                                continue;
+                            }
+                            var attractor = foundAttractors[i];
                             Attract(attractor);
-                            if (attractor.gameObject.GetComponent<ReduceSizeOverTime>() == null && attractor != this)
+                            if (attractor.gameObject.GetComponent<ReduceSizeOverTime>() is ReduceSizeOverTime time && attractor != null && attractor != this)
+                            {
+                                time.isSucked = true;
+                            }
+                            else
                             {
                                 attractor.gameObject.AddComponent<ReduceSizeOverTime>();
-                                attractor.gameObject.GetComponent<ReduceSizeOverTime>().isSucked = true;
                             }
 
                         }
@@ -37,20 +48,19 @@ namespace Jutsu.Kamui
         
         }
 
-        void Attract(Attractor objToAttract) {
-
-
+        void Attract(Attractor objToAttract)
+        {
+            if (objToAttract == null) return;
             Rigidbody rbToAttract = objToAttract.rb;
 
+            Vector3 direction = rb.transform.position - rbToAttract.transform.position;
+            rb.transform.position = rb.transform.root.position;
+            float distance = Vector3.Distance(rb.position, rbToAttract.position);
 
-            Vector3 direction = rb.position - rbToAttract.position;
-
-            float distance = direction.magnitude;
-
+            
             float forceMagnitude = gravConstant * (rb.mass * rbToAttract.mass) / Mathf.Pow(distance, 2);
 
-            Vector3 force = direction.normalized * forceMagnitude;
-
+            Vector3 force = direction * forceMagnitude;
             rbToAttract.AddForce(force);
         
         }

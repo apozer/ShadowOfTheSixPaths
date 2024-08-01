@@ -73,7 +73,8 @@ namespace Jutsu.Kamui
                     kamuiRef.transform.position = Player.local.head.transform.position + (Player.local.head.transform.forward * 8f);
                     kamuiRef.transform.LookAt(Player.local.head.transform);
                     thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
-                    thisAttractor.rb = kamui.gameObject.GetComponentInChildren<Rigidbody>();
+                    thisAttractor.rb = kamuiRef.gameObject.GetComponentInChildren<Rigidbody>();
+                    thisAttractor.rb.transform.position = kamuiRef.transform.position;
                     thisAttractor.mainAttractor = true;
                     GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
                 }
@@ -89,8 +90,8 @@ namespace Jutsu.Kamui
                 if (distortionAmount < 1 && !destroy) {
 
                     distortionAmount += 0.01f;
+                    
                     foreach (Material mat in kamui.GetComponentInChildren<MeshRenderer>().materials) {
-                        Debug.Log(mat);
                         mat.SetFloat("_distortionAmount",distortionAmount);
                     }
                 }
@@ -115,18 +116,14 @@ namespace Jutsu.Kamui
                         distortionAmount -= 0.01f;
                         foreach (Material mat in kamui.GetComponentInChildren<MeshRenderer>().materials)
                         {
-                            Debug.Log("distortion: " + distortionAmount);
                             mat.SetFloat("_distortionAmount", distortionAmount);
                         }
                     }
-
                     else {
                         GameObject.Destroy(kamui);
                         value = false;
                     }
-            
                 }
-
                 yield return null;
             }
         }
@@ -134,14 +131,11 @@ namespace Jutsu.Kamui
         
         private List<Item> FindAttractors(Collider[] colliderObjects)
         {
-
             List<Item> colliderItems = new List<Item>();
             if (colliderObjects != null)
             {
-
                 foreach (Collider collider in colliderObjects)
                 {
-
                     if (collider.gameObject.GetComponentInParent<Item>() is Item item)
                     {
                         Item sideLeft = Player.local.creature?.equipment?.GetHeldItem(Side.Left);
@@ -151,9 +145,7 @@ namespace Jutsu.Kamui
                         {
                             if (!colliderItems.Contains(collider.gameObject.GetComponentInParent<Item>()))
                             {
-
                                 colliderItems.Add(collider.gameObject.GetComponentInParent<Item>());
-
                             }
                         }
                     }
@@ -161,9 +153,7 @@ namespace Jutsu.Kamui
                         
                         if (!colliderCreature.Contains(collider.gameObject.GetComponentInParent<Creature>()))
                         {
-
                             colliderCreature.Add(collider.gameObject.GetComponentInParent<Creature>());
-
                         }
                     }
                 }
@@ -177,48 +167,35 @@ namespace Jutsu.Kamui
             
             if (colliderItems != null)
             {
-                Debug.Log("Got past colliderItems null check");
                 foreach (Item collideItem in colliderItems)
                 {
                     if (collideItem != null)
                     {
-                        Debug.Log(collideItem);
-
                         collideItem.gameObject.AddComponent<Attractor>();
                         Attractor added = collideItem.gameObject.GetComponent<Attractor>();
 
                         added.rb = collideItem.gameObject.GetComponent<Rigidbody>();
-                        Debug.Log(added);
                         if (!attractors.Contains(added))
                         {
-                        Debug.Log("Add to list");
-                        attractors.Add(added);
+                            attractors.Add(added);
                         }
-
                     }
-
                 }
-
-
+                
                 foreach (Creature collideCreatures in colliderCreature)
                 {
                     if (colliderCreature != null)
                     {
-
                         collideCreatures.gameObject.AddComponent<Attractor>();
                         Attractor added = collideCreatures.gameObject.GetComponent<Attractor>();
 
                         added.rb = collideCreatures.gameObject.GetComponent<Rigidbody>();
                         if (!attractors.Contains(added))
                         {
-                            Debug.Log("Add to list");
                             attractors.Add(added);
                         }
-
                     }
-
                 }
-
             }
         }
         private void SetTimer()

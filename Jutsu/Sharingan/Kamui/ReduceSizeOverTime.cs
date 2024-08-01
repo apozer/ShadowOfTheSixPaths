@@ -27,7 +27,7 @@ namespace Jutsu.Kamui
             minScale = new Vector3(0.01f,0.01f,0.01f);
 
 
-            kamuiDistortion = JutsuEntry.local.kamuiVFX.GetComponent<MeshRenderer>().materials[0].DeepCopyByExpressionTree();
+            kamuiDistortion = JutsuEntry.local.kamuiVFX.GetComponentInChildren<MeshRenderer>().materials[0].DeepCopyByExpressionTree();
 
             distortionValue = 0f;
 
@@ -38,13 +38,6 @@ namespace Jutsu.Kamui
 
             if (isSucked)
             {
-                if (distortionValue < 1f)
-                {
-                    distortionValue += 0.01f;
-                    item.gameObject.GetComponent<Renderer>().sharedMaterial = kamuiDistortion;
-                    item.gameObject.GetComponent<Renderer>().sharedMaterial.SetFloat("_distortionAmount", distortionValue);
-                }
-
                 elapsedTime += Time.deltaTime;
                 float percentageComplete = elapsedTime / 0.2f;
 
