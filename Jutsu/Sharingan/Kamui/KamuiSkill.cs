@@ -8,7 +8,6 @@ namespace Jutsu.Kamui
 {
     public class KamuiSkill : JutsuSkill
     {
-        GameObject kamui;
         private GameObject kamuiRef;
         Collider[] colliderObjects;
         List<Creature> colliderCreature = new List<Creature>();
@@ -28,7 +27,6 @@ namespace Jutsu.Kamui
         internal override void CustomStartData()
         {
             distortionAmount = 0f;
-            kamui = JutsuEntry.local.kamuiVFX;
             _speechRecognizer = new SpeechRecognitionEngine();
             Choices kamuiChoice = new Choices();
             kamuiChoice.Add("Kamui");
@@ -39,16 +37,9 @@ namespace Jutsu.Kamui
             _speechRecognizer.RecognizeAsync(RecognizeMode.Multiple);
             _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
         }
-
-        public override void OnSkillUnloaded(SkillData skillData, Creature creature)
-        {
-            GameObject.Destroy(kamui);
-            base.OnSkillUnloaded(skillData, creature);
-        }
-
         private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Confidence > 0.93f && !kamuiRef)
+            if (e.Result.Confidence > 0.93f && kamuiRef == null)
             {
                 Debug.Log(e.Result.Text);
                 if (e.Result.Text == "Kamui")
@@ -76,7 +67,7 @@ namespace Jutsu.Kamui
                         if (hit.collider != null)
                         {
                             
-                            kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
+                            kamuiRef = GameObject.Instantiate(JutsuEntry.local.kamuiVFX.DeepCopyByExpressionTree());
                             kamuiRef.transform.position = hit.point - (hit.point - Player.local.head.transform.position).normalized * 1f;
                             kamuiRef.transform.LookAt(Player.local.head.transform);
                             thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
@@ -88,7 +79,7 @@ namespace Jutsu.Kamui
                         else
                         {
                         
-                            kamuiRef = GameObject.Instantiate(kamui.DeepCopyByExpressionTree());
+                            kamuiRef = GameObject.Instantiate(JutsuEntry.local.kamuiVFX.DeepCopyByExpressionTree());
                             kamuiRef.transform.position = Player.local.head.transform.position + (Player.local.head.transform.forward * 8f);
                             kamuiRef.transform.LookAt(Player.local.head.transform);
                             thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
@@ -98,9 +89,26 @@ namespace Jutsu.Kamui
                             GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
                         }
                     }
+                    else
+                    {
+                        
+                        kamuiRef = GameObject.Instantiate(JutsuEntry.local.kamuiVFX.DeepCopyByExpressionTree());
+                        kamuiRef.transform.position = Player.local.head.transform.position + (Player.local.head.transform.forward * 8f);
+                        kamuiRef.transform.LookAt(Player.local.head.transform);
+                        thisAttractor = kamuiRef.gameObject.AddComponent<Attractor>();
+                        thisAttractor.rb = kamuiRef.gameObject.GetComponentInChildren<Rigidbody>();
+                        thisAttractor.rb.transform.position = kamuiRef.transform.position;
+                        thisAttractor.mainAttractor = true;
+                        GameManager.local.StartCoroutine(KamuiEffectLoop(kamuiRef, thisAttractor, attractorOn, startDestroy, stopChecking));
+                    }
                 }
                 yield return null;
             }
+        }
+
+        internal override void CustomEndData()
+        {
+            GameObject.Destroy(kamuiRef);
         }
 
         IEnumerator KamuiEffectLoop(GameObject kamui, Attractor attractor, bool on, bool destroy, bool stopChecking)

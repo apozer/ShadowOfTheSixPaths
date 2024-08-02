@@ -121,6 +121,7 @@
         <Compile Include="Sharingan\DojutsuTracking.cs" />
         <Compile Include="Sharingan\KamuiSharinganSkill.cs" />
         <Compile Include="Sharingan\Kamui\Attractor.cs" />
+        <Compile Include="Sharingan\Kamui\KamuiPassiveSkill.cs" />
         <Compile Include="Sharingan\Kamui\KamuiSkill.cs" />
         <Compile Include="Sharingan\Kamui\MangekyoMapper.cs" />
         <Compile Include="Sharingan\Kamui\ReduceSizeOverTime.cs" />
