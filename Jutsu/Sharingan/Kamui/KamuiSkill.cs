@@ -24,10 +24,11 @@ namespace Jutsu.Kamui
         private bool activateKamui;
 
         SpeechRecognitionEngine _speechRecognizer;
+        
         internal override void CustomStartData()
         {
             distortionAmount = 0f;
-            _speechRecognizer = new SpeechRecognitionEngine();
+            if(_speechRecognizer == null) _speechRecognizer = new SpeechRecognitionEngine();
             Choices kamuiChoice = new Choices();
             kamuiChoice.Add("Kamui");
             Grammar servicesGrammar = new Grammar(new GrammarBuilder(kamuiChoice));
@@ -39,7 +40,7 @@ namespace Jutsu.Kamui
         }
         private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Confidence > 0.93f && kamuiRef == null)
+            if (e.Result.Confidence > 0.93f && !kamuiRef)
             {
                 Debug.Log(e.Result.Text);
                 if (e.Result.Text == "Kamui")
@@ -53,7 +54,7 @@ namespace Jutsu.Kamui
         {
             while (true)
             {
-                if (activateKamui && kamuiRef == null)
+                if (activateKamui)
                 {
                     SetTimer();
                     attractorOn = false;
@@ -109,6 +110,19 @@ namespace Jutsu.Kamui
         internal override void CustomEndData()
         {
             GameObject.Destroy(kamuiRef);
+            _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
+            Attractor next = null;
+            foreach (var attractor in attractors)
+            {
+                if (!attractor.mainAttractor)
+                {
+                    next = attractor;
+                    attractor.RemoveReduceSizeScript();
+                    attractors.Remove(attractor);
+                    GameObject.Destroy(next);
+                    next = null;
+                }
+            }
         }
 
         IEnumerator KamuiEffectLoop(GameObject kamui, Attractor attractor, bool on, bool destroy, bool stopChecking)
@@ -125,7 +139,7 @@ namespace Jutsu.Kamui
                     }
                 }
             
-                if (!stopChecking) {
+                if (!stopChecking && !startDestroy) {
                     
                     kamui.GetComponentInChildren<Rigidbody>().isKinematic = true;
                     attractor.attractorOn = true;
@@ -231,7 +245,7 @@ namespace Jutsu.Kamui
         {
 
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(10000);
+            aTimer = new Timer(10000);
             // Hook up the Elapsed event for the timer. 
 
             aTimer.Elapsed += OnTimedEvent;
@@ -240,7 +254,7 @@ namespace Jutsu.Kamui
             aTimer.Enabled = true;
 
         }
-
+        
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
             startDestroy = true;

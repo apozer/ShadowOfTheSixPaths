@@ -95,6 +95,10 @@ namespace Jutsu
         public GameObject mangekyoSFX;
 
         public Item activeChidori;
+        
+        
+        // Susanoo's
+        public GameObject sasukeSusanooRibcage;
        
         public override void OnCatalogRefresh()
         {
@@ -175,6 +179,9 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Mangekyo.SFX", obj => { mangekyoSFX = obj;}, "MangekyoSFX");
             
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.MangekyoSharingan.Kamui.VFX", obj => { kamuiVFX = obj;}, "KamuiVFX");
+            
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Mangekyo.Susanoo.Ribcage.Sasuke",
+                obj => { sasukeSusanooRibcage = obj;}, "SasukeSusanooRibcage");
             return base.LoadAddressableAssetsCoroutine();
         }
 

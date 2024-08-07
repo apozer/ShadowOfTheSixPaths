@@ -38,7 +38,7 @@ namespace Jutsu
         public bool transitionActive = false;
         public string lastActive = "";
         public bool mangekyoActivated = false;
-        public bool devMode = false;
+        public bool devMode = true;
         private string devModeMangekyo = "KamuiSharinganSkills";
         
         public delegate void MangekyoActive();

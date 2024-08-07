@@ -14,7 +14,7 @@ namespace Jutsu
         private AudioSource mangekyoSound;
         internal override void CustomStartData()
         {
-            _speechRecognizer = new SpeechRecognitionEngine();
+            if(_speechRecognizer == null) _speechRecognizer = new SpeechRecognitionEngine();
             Choices amaterasu = new Choices();
             amaterasu.Add("Amaterasu");
             Grammar servicesGrammar = new Grammar(new GrammarBuilder(amaterasu));
@@ -39,7 +39,7 @@ namespace Jutsu
         public override void OnSkillUnloaded(SkillData skillData, Creature creature)
         {
             base.OnSkillUnloaded(skillData, creature);
-            _speechRecognizer = null;
+            _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
         }
 
         internal override IEnumerator JutsuStart()

@@ -34,62 +34,54 @@ namespace Jutsu.Kamui
 
         }
 
+        internal void ResetSize()
+        {
+            if (item)
+            {
+                item.gameObject.transform.localScale = new Vector3(1, 1, 1);
+            }
+
+            if (creature)
+            {
+                creature.transform.localScale = new Vector3(1, 1, 1);
+            }
+        }
+
         void Update() {
 
             if (isSucked)
             {
                 elapsedTime += Time.deltaTime;
-                float percentageComplete = elapsedTime / 0.2f;
+                float percentageComplete = elapsedTime / 1f;
 
                 if (item != null)
                 {
-                    item.transform.localScale = Vector3.Lerp(item.transform.localScale, minScale, Mathf.SmoothStep(0, 1, percentageComplete));
+                    item.transform.localScale = Vector3.Lerp(item.transform.localScale, minScale, percentageComplete);
                 }
 
                 else if (creature != null) {
-                
-                    creature.transform.localScale = Vector3.Lerp(creature.transform.localScale, minScale, Mathf.SmoothStep(0, 1, percentageComplete));
-
+                    creature.transform.localScale = Vector3.Lerp(creature.transform.localScale, minScale, percentageComplete);
                 }
-
                 
-
-
-
                 elapsedTime = 0f;
 
                 if (item != null)
                 {
-                    if (item.transform.localScale == minScale)
+                    if (percentageComplete >= 1f)
                     {
-
-
                         isSucked = false;
-                        item.Despawn();
-
+                        GameObject.Destroy(this);
                     }
                 }
-
                 else if (creature != null)
                 {
-                    if (creature.transform.localScale == minScale)
+                    if (percentageComplete >= 1f)
                     {
-
-
                         isSucked = false;
-                        creature.Despawn();
-
+                        GameObject.Destroy(this);
                     }
                 }
-
-
-
-
-
             }
-
-
         }
-
     }
 }

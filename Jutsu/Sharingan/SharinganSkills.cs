@@ -12,8 +12,8 @@ namespace Jutsu
 
         internal override void CustomStartData()
         {
-            /*sharinganOptions.Add("Sharingan");
-            sharinganOptions.Add("Rinnaygan");*/
+            /*sharinganOptions.Add("Sharingan");*/
+            sharinganOptions.Add("Rinnaygan");
             sharinganOptions.Add("Disable");
             if (DojutsuTracking.mInstance.mangekyoActivated || DojutsuTracking.mInstance.devMode) sharinganOptions.Add("Mangekyo Sharingan");
             DojutsuTracking.mInstance.mangekyoActive += () =>

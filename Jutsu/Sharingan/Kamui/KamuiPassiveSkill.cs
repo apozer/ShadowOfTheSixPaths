@@ -9,16 +9,20 @@ namespace Jutsu.Kamui
     {
         private List<Item> handledItems = new List<Item>();
         private List<Creature> ignoringCreatures = new List<Creature>();
+        private bool dataStarted = false;
         internal override void CustomStartData()
         {
-            if (Creature.allActive.Count > 1)
+            StartData();
+        }
+
+        void StartData()
+        {
+            dataStarted = true;
+            foreach (var creature in Creature.allActive)
             {
-                foreach (var creature in Creature.allActive)
+                if (!creature.isPlayer)
                 {
-                    if (!creature.isPlayer)
-                    {
-                        AddEvents(creature);
-                    }
+                    AddEvents(creature);
                 }
             }
             EventManager.onCreatureSpawn += CreatureSpawnEvent;
@@ -26,7 +30,6 @@ namespace Jutsu.Kamui
 
         void CreatureSpawnEvent(Creature creature)
         {
-            Debug.Log("Creature spawned");
             if (!creature.isPlayer)
             {
                 AddEvents(creature);
@@ -66,11 +69,18 @@ namespace Jutsu.Kamui
             if (!handledItems.Contains(handle.item))
             {
                 handledItems.Add(handle.item);
+                handle.item.IgnoreRagdollCollision(Player.local.creature.ragdoll);
             }
         }
 
         internal override void CustomEndData()
         {
+            ResetData();
+        }
+
+        void ResetData()
+        {
+            dataStarted = false;
             for (int y = 0; y < handledItems.Count; y++)
             {
                 var item = handledItems[y];
@@ -84,7 +94,31 @@ namespace Jutsu.Kamui
                 UnAddEvents(creature);
             }
 
+            handledItems.Clear();
+            handledItems.TrimExcess();
+            ignoringCreatures.Clear();
+            ignoringCreatures.TrimExcess();
+            
             EventManager.onCreatureSpawn -= CreatureSpawnEvent;
+        }
+
+        internal override IEnumerator JutsuStart()
+        {
+            while (true)
+            {
+                if (Player.local.handRight.isFist || Player.local.handLeft.isFist)
+                {
+                    if(dataStarted)
+                        ResetData();
+                }
+                else
+                {
+                    if(!dataStarted)
+                        StartData();
+                }
+
+                yield return null;
+            }
         }
     }
 }

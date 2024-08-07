@@ -13,6 +13,21 @@ namespace Jutsu.Kamui
         internal bool attractorOn;
         bool isSucked = true;
 
+        internal void RemoveReduceSizeScript()
+        {
+            if (!mainAttractor)
+            {
+                ReduceSizeOverTime script;
+                gameObject.TryGetComponent(out script);
+
+                if (script)
+                {
+                    script.ResetSize();
+                    GameObject.Destroy(script);
+                }
+            }
+        }
+
         void Update() {
 
             if (mainAttractor != null && rb != null) {
@@ -37,7 +52,8 @@ namespace Jutsu.Kamui
                             }
                             else
                             {
-                                attractor.gameObject.AddComponent<ReduceSizeOverTime>();
+                                var overTime = attractor.gameObject.AddComponent<ReduceSizeOverTime>();
+                                overTime.isSucked = true;
                             }
 
                         }
@@ -50,6 +66,7 @@ namespace Jutsu.Kamui
 
         void Attract(Attractor objToAttract)
         {
+            
             if (objToAttract == null) return;
             Rigidbody rbToAttract = objToAttract.rb;
 
@@ -57,12 +74,23 @@ namespace Jutsu.Kamui
             rb.transform.position = rb.transform.root.position;
             float distance = Vector3.Distance(rb.position, rbToAttract.position);
 
-            
-            float forceMagnitude = gravConstant * (rb.mass * rbToAttract.mass) / Mathf.Pow(distance, 2);
 
-            Vector3 force = direction * forceMagnitude;
-            rbToAttract.AddForce(force);
-        
+            if (distance > 0.3f)
+            {
+
+                float forceMagnitude = gravConstant * (rb.mass * rbToAttract.mass) / Mathf.Pow(distance, 2);
+
+                Vector3 force = direction * forceMagnitude;
+                rbToAttract.AddForce(force);
+            }
+            else
+            {
+                foundAttractors.Remove(objToAttract);
+                foundAttractors.TrimExcess();
+                GameObject.Destroy(objToAttract.transform.root.gameObject);
+            }
+
+
         }
 
 
