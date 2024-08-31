@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using UnityEngine;
+using ThunderRoad;
 
 namespace Jutsu
 {
-    public class KamuiSharinganSkill : SharinganSkills
+    public class BaseSharinganSkill : SharinganSkills
     {
         internal override void CustomStartData()
         {
-            DojutsuTracking.mInstance.SetMangekyoAbilities(mangekyoAbilities);
             DojutsuTracking.mInstance.SetSharinganAbilities(baseSharinganAbilities);
             base.CustomStartData();
         }

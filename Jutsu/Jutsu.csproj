@@ -110,6 +110,9 @@
         <Compile Include="Rasenshuriken.cs" />
         <Compile Include="ReceiverSizing.cs" />
         <Compile Include="RinneganCastJutsu.cs" />
+        <Compile Include="Rinnegan\BaseRinnegan.cs" />
+        <Compile Include="Rinnegan\DevaPath\AlmightyPush.cs" />
+        <Compile Include="Rinnegan\DevaPath\DevaSkills.cs" />
         <Compile Include="SDFBakeTool.cs" />
         <Compile Include="Seals.cs" />
         <Compile Include="SequenceTracker.cs" />
@@ -118,6 +121,8 @@
         <Compile Include="ShadowPossessionJutsu.cs" />
         <Compile Include="Sharingan\Amaterasu\AmaterasuBurn.cs" />
         <Compile Include="Sharingan\Amaterasu\AmaterasuSkill.cs" />
+        <Compile Include="Sharingan\BaseSharinganSkill.cs" />
+        <Compile Include="Sharingan\Base\SharinganSlow.cs" />
         <Compile Include="Sharingan\DojutsuManagers\DojutsuTracking.cs" />
         <Compile Include="Sharingan\DojutsuManagers\MangekyoTracker.cs" />
         <Compile Include="Sharingan\KamuiSharinganSkill.cs" />

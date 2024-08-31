@@ -15,6 +15,8 @@ namespace Jutsu
     public class Chidori : JutsuSkill
     {
         private ItemData chidoriData;
+        private Gradient original;
+        private Gradient black;
         private Item chidori;
         private VisualEffect chidoriVFX;
         private GameObject chidoriStart;

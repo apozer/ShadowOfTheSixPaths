@@ -35,14 +35,17 @@ namespace Jutsu.Susanoo
         {
             skilledEnabled = true;
             susanooType = GetSusanooKind();
-            _speechRecognizer = new SpeechRecognitionEngine();
-            Choices susanoo = new Choices();
-            susanoo.Add("Soosahno");
-            Grammar servicesGrammar = new Grammar(new GrammarBuilder(susanoo));
-            _speechRecognizer.RequestRecognizerUpdate();
-            _speechRecognizer.LoadGrammarAsync(servicesGrammar);
-            _speechRecognizer.SetInputToDefaultAudioDevice();
-            _speechRecognizer.RecognizeAsync(RecognizeMode.Multiple);
+            if (_speechRecognizer == null)
+            {
+                _speechRecognizer = new SpeechRecognitionEngine();
+                Choices susanoo = new Choices();
+                susanoo.Add("Soosahno");
+                Grammar servicesGrammar = new Grammar(new GrammarBuilder(susanoo));
+                _speechRecognizer.RequestRecognizerUpdate();
+                _speechRecognizer.LoadGrammarAsync(servicesGrammar);
+                _speechRecognizer.SetInputToDefaultAudioDevice();
+                _speechRecognizer.RecognizeAsync(RecognizeMode.Multiple);
+            }
             _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
         }
         
@@ -221,7 +224,7 @@ namespace Jutsu.Susanoo
 
         internal override void CustomEndData()
         {
-            _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
+            if(_speechRecognizer != null) _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
             if (susanoo)
             {
                 if(timer != null) GameManager.local.StopCoroutine(timer);

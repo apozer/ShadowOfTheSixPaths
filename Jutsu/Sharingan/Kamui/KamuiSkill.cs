@@ -109,8 +109,8 @@ namespace Jutsu.Kamui
 
         internal override void CustomEndData()
         {
-            GameObject.Destroy(kamuiRef);
-            _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
+            if(kamuiRef) GameObject.Destroy(kamuiRef);
+            if(_speechRecognizer != null) _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
             Attractor next = null;
             foreach (var attractor in attractors)
             {
@@ -227,7 +227,7 @@ namespace Jutsu.Kamui
                 
                 foreach (Creature collideCreatures in colliderCreature)
                 {
-                    if (colliderCreature != null)
+                    if (collideCreatures != null)
                     {
                         collideCreatures.gameObject.AddComponent<Attractor>();
                         Attractor added = collideCreatures.gameObject.GetComponent<Attractor>();

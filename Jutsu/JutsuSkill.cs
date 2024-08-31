@@ -89,6 +89,7 @@ namespace Jutsu
             Debug.Log("Set up for after player is done");
             this.casterLeft = Player.local.handLeft.ragdollHand.caster;
             this.casterRight = Player.local.handRight.ragdollHand.caster;
+            Debug.Log("Hit Custom Start Data");
             CustomStartData();
             activeJutsuCoroutine = GameManager.local.StartCoroutine(JutsuStart());
         }

@@ -31,8 +31,6 @@ namespace Jutsu
         
         //Gameobject for Substitution Jutsu
         internal ItemData logData;
-
-        internal ItemData chidoriItemData;
         
         //GameObjects for Shadow Possession Jutsu
         public GameObject shadow;
@@ -88,6 +86,13 @@ namespace Jutsu
         internal string lastActive = "";
         private string currentlyActive = "";
         
+        
+        //Sharingan SFX
+        public GameObject sharinganSFX;
+        public GameObject sharinganDisableSFX;
+        
+        //Rinnegan SFX
+        public GameObject rinneganStartSFX;
         
         //Kamui
         public GameObject kamuiVFX;
@@ -182,6 +187,10 @@ namespace Jutsu
             
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Mangekyo.Susanoo.Ribcage.Sasuke",
                 obj => { sasukeSusanooRibcage = obj;}, "SasukeSusanooRibcage");
+            
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.SFX", obj => { sharinganSFX = obj; Debug.Log("SHARINGAN SFX IS: " + sharinganSFX);}, "SharinganSFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Disable.SFX", obj => { sharinganDisableSFX = obj;},"SharinganDisableSFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Rinnegan.SFX", obj => { rinneganStartSFX = obj;}, "RinneganStartSFX");
             return base.LoadAddressableAssetsCoroutine();
         }
 

@@ -12,21 +12,30 @@ namespace Jutsu
         private SpeechRecognitionEngine _speechRecognizer;
         private bool activateAmaterasu;
         private AudioSource mangekyoSound;
+
         internal override void CustomStartData()
         {
-            if(_speechRecognizer == null) _speechRecognizer = new SpeechRecognitionEngine();
-            Choices amaterasu = new Choices();
-            amaterasu.Add("Amaterasu");
-            Grammar servicesGrammar = new Grammar(new GrammarBuilder(amaterasu));
-            _speechRecognizer.RequestRecognizerUpdate();
-            _speechRecognizer.LoadGrammarAsync(servicesGrammar);
-            _speechRecognizer.SetInputToDefaultAudioDevice();
-            _speechRecognizer.RecognizeAsync(RecognizeMode.Multiple);
-            _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
+            Debug.Log(_speechRecognizer);
+            if (_speechRecognizer == null)
+            { _speechRecognizer = new SpeechRecognitionEngine();
+                Choices amaterasu = new Choices();
+                amaterasu.Add("Amaterasu");
+                Grammar servicesGrammar = new Grammar(new GrammarBuilder(amaterasu));
+                _speechRecognizer.SetInputToDefaultAudioDevice();
+                _speechRecognizer.RequestRecognizerUpdate();
+                _speechRecognizer.LoadGrammarAsync(servicesGrammar);
+                _speechRecognizer.RecognizeAsync(RecognizeMode.Multiple);
+                _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
+            }
+            else
+            {
+                _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
+            }
         }
 
         private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
+            Debug.Log("Recognized: " + e.Result);
             if (e.Result.Confidence > 0.93f)
             {
                 if (e.Result.Text == "Amaterasu")
@@ -35,15 +44,15 @@ namespace Jutsu
                 }
             }
         }
-
-        public override void OnSkillUnloaded(SkillData skillData, Creature creature)
+        
+        internal override void CustomEndData()
         {
-            base.OnSkillUnloaded(skillData, creature);
-            _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
+            if(_speechRecognizer != null) _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
         }
 
         internal override IEnumerator JutsuStart()
         {
+            Debug.Log("Jutsu Start Loop in Amaterasu Skill");
             while (true)
             {
                 if (activateAmaterasu)
@@ -113,6 +122,8 @@ namespace Jutsu
                             {
                                     if (JutsuEntry.local.activeChidori)
                                     {
+                                        JutsuEntry.local.activeChidori.GetComponentInChildren<VisualEffect>()
+                                            .SetBool("amaterasu", true);
                                         JutsuEntry.local.activeChidori.gameObject.transform.GetComponentInChildren<ParticleSystem>().Play();
                                         var trigger = JutsuEntry.local.activeChidori.gameObject.transform.FindChildRecursiveTR(
                                             "AmaterasuTrigger");
@@ -133,6 +144,8 @@ namespace Jutsu
                             {
                                 if (JutsuEntry.local.activeChidori)
                                 {
+                                    JutsuEntry.local.activeChidori.GetComponentInChildren<VisualEffect>()
+                                        .SetBool("amaterasu", true);
                                     ParticleSystem ps = JutsuEntry.local.activeChidori.gameObject.transform
                                         .GetComponentInChildren<ParticleSystem>();
                                     ps.Play();

@@ -14,6 +14,8 @@ namespace Jutsu
     {
         public static MangekyoTracker local;
         public string mangekyoAbility;
+        public string sharinganTier;
+        public bool rinnegan;
         private bool saveExists = false;
         public override void ScriptLoaded(ModManager.ModData modData)
         {
@@ -27,7 +29,7 @@ namespace Jutsu
         {
             yield return new WaitUntil(() => Player.characterData != null);
             List<PlatformBase.Save> saves = null;
-            yield return GameManager.platform.ReadSavesCoroutine("mangekyo", value =>
+            yield return GameManager.platform.ReadSavesCoroutine("dojutsu", value =>
             {
                 Debug.Log("Saves exist");
                 saves = value;
@@ -38,9 +40,14 @@ namespace Jutsu
             {
                 if (save.id.Equals(Player.characterData.ID))
                 {
-                    MangekyoMapper mapper = JsonConvert.DeserializeObject<MangekyoMapper>(save.data);
+                    DojutsuMapper mapper = JsonConvert.DeserializeObject<DojutsuMapper>(save.data);
                     Debug.Log(mapper.id);
-                    if(mapper != null) mangekyoAbility = mapper.mangekyoSharingan;
+                    if (mapper != null)
+                    {
+                        mangekyoAbility = mapper.mangekyoSharingan;
+                        sharinganTier = mapper.sharinganTier;
+                        rinnegan = mapper.rinnegan;
+                    }
                     saveExists = true;
                     break;
                 }
@@ -49,12 +56,12 @@ namespace Jutsu
         }
         public  IEnumerator SaveJsonData()
         {
-            MangekyoMapper mapper = new MangekyoMapper();
+            DojutsuMapper mapper = new DojutsuMapper();
             mapper.id = Player.characterData.ID;
             mapper.mangekyoSharingan = local.mangekyoAbility;
 
             var json = mapper.ToJson();
-            PlatformBase.Save save = new PlatformBase.Save(mapper.id, "mangekyo", json);
+            PlatformBase.Save save = new PlatformBase.Save(mapper.id, "dojutsu", json);
             yield return GameManager.platform.WriteSaveCoroutine(save);
 
         }
