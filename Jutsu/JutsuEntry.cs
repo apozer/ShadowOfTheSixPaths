@@ -93,6 +93,8 @@ namespace Jutsu
         
         //Rinnegan SFX
         public GameObject rinneganStartSFX;
+        //Deva Path
+        public GameObject shinraTenseiSFX;
         
         //Kamui
         public GameObject kamuiVFX;
@@ -191,6 +193,7 @@ namespace Jutsu
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.SFX", obj => { sharinganSFX = obj; Debug.Log("SHARINGAN SFX IS: " + sharinganSFX);}, "SharinganSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Sharingan.Disable.SFX", obj => { sharinganDisableSFX = obj;},"SharinganDisableSFX");
             Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Rinnegan.SFX", obj => { rinneganStartSFX = obj;}, "RinneganStartSFX");
+            Catalog.LoadAssetAsync<GameObject>("SOTSP.Jutsu.Rinnegan.Deva.SFX.ShinraTensei", obj => { shinraTenseiSFX = obj;}, "ShinraTenseiSFX");
             return base.LoadAddressableAssetsCoroutine();
         }
 

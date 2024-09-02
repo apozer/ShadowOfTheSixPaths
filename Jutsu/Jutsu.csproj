@@ -102,6 +102,7 @@
         <Compile Include="JutsuEntry.cs" />
         <Compile Include="JutsuSkill.cs" />
         <Compile Include="LightningReleaseCast.cs" />
+        <Compile Include="Managed\ModOptions.cs" />
         <Compile Include="MultiShadowCloneJutsu.cs" />
         <Compile Include="PhoenixFlowerJutsu.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
@@ -113,6 +114,8 @@
         <Compile Include="Rinnegan\BaseRinnegan.cs" />
         <Compile Include="Rinnegan\DevaPath\AlmightyPush.cs" />
         <Compile Include="Rinnegan\DevaPath\DevaSkills.cs" />
+        <Compile Include="Rinnegan\DevaPath\PathsOfPain.cs" />
+        <Compile Include="Rinnegan\DevaPath\UniversalPull.cs" />
         <Compile Include="SDFBakeTool.cs" />
         <Compile Include="Seals.cs" />
         <Compile Include="SequenceTracker.cs" />

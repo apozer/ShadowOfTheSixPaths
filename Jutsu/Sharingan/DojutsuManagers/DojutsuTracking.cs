@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using Jutsu.Rinnegan.DevaPath;
 using UnityEngine;
 using ThunderRoad;
 using Random = UnityEngine.Random;
@@ -22,6 +24,7 @@ namespace Jutsu
 
         public static DojutsuTracking mInstance;
         public Material lerpMaterial;
+        public Dictionary<Creature, Material> pathsOfPainMaterials = new Dictionary<Creature, Material>();
         public Texture2D sharinganBase;
         public Texture2D sasukeMangekyoSharingan;
         public Texture2D kamuiMangekyoSharingan;
@@ -61,7 +64,8 @@ namespace Jutsu
 
         private List<string> mangekyoAbilities;
         private List<string> sharinganAbilities;
-        private List<string> rinneganAbilties;
+        private Dictionary<string, List<string>> pathAbilities = new Dictionary<string, List<string>>();
+        private List<string> rinneganAbilities;
         
         //tracker for Sharingan Slow active creature
         public Creature activeCreature;
@@ -77,11 +81,59 @@ namespace Jutsu
         {
             sharinganAbilities = list;
         }
+        public void SetPathAbilities(string skillType, List<string> list)
+        {
+            pathAbilities.Add(skillType, list);
+        }
         public void SetRinneganAbilities(List<string> list)
         {
-            rinneganAbilties = list;
+            rinneganAbilities = list;
         }
-        
+
+        public void RemoveRinneganAbility(string abilityType)
+        {
+            pathAbilities.Remove(abilityType);
+        }
+
+        public string nextPath = "";
+        IEnumerator WaitForPainPossessedRenderers(Creature creature)
+        {
+            yield return new WaitUntil(() => creature.renderers.Count > 0);
+            foreach (var renderer in creature.renderers)
+            {
+                if (renderer.renderer.name.Equals("Eyes_LOD0"))
+                {
+                    if (creature.gameObject.GetComponent<PathsOfPain>() is PathsOfPain pop)
+                    {
+                        if (pop != null)
+                        {
+                            pop.pathData = new Tuple<string, Creature, Material, bool>(nextPath, creature,
+                                renderer.renderer.materials[0].DeepCopyByExpressionTree(), true);
+                        }
+                    }
+
+                    if (!pathsOfPainMaterials.ContainsKey(creature))
+                    {
+                        Material original = renderer.renderer.materials[0].DeepCopyByExpressionTree();
+                        Material painLerpMaterial = lerpMaterial.DeepCopyByExpressionTree();
+                        
+                        mInstance.defaultColor = original.DeepCopyByExpressionTree();
+                        mInstance.defaultNormalMap = (Texture2D)original.GetTexture("_BumpMap");
+                        mInstance.defaultMetallic = (Texture2D)original.GetTexture("_MetallicGlossMap");
+                        painLerpMaterial.SetTexture("_OriginalTexture",
+                            original.GetTexture("_BaseMap").DeepCopyByExpressionTree());
+                        painLerpMaterial.SetTexture("_normalOriginal",
+                            DojutsuTracking.mInstance.defaultNormalMap);
+                        painLerpMaterial.SetTexture("_metallicOriginal",
+                            DojutsuTracking.mInstance.defaultMetallic);
+                        painLerpMaterial.SetFloat("_transition", 1f);
+                        renderer.renderer.material = painLerpMaterial;
+                        pathsOfPainMaterials.Add(creature, painLerpMaterial);
+                    }
+                }
+            }
+            
+        }
         IEnumerator WaitForRenderers(Creature creature)
         {
             yield return new WaitUntil(() => creature.renderers.Count > 0);
@@ -242,11 +294,15 @@ namespace Jutsu
             {
                 playerSpawned.onCreaturePossess += creaturePosses =>
                 {
-                    if (creaturePosses.currentEthnicGroup.id.ToLower().Equals("uchiha"))
+                    if (creaturePosses.currentEthnicGroup.id.ToLower().Equals("uchiha") && !PathsOfPain.obtainedCreatures.Contains(creaturePosses))
                     {
                         if (raceInstantiated) return;
                         GameManager.local.StartCoroutine(WaitForRenderers(creaturePosses));
 
+                    }
+                    else if (PathsOfPain.obtainedCreatures.Contains(creaturePosses))
+                    {
+                        GameManager.local.StartCoroutine(WaitForPainPossessedRenderers(creaturePosses));
                     }
                     raceInstantiated = true;
                 };
@@ -387,7 +443,7 @@ namespace Jutsu
                 case EyeMaterialState.MangekyoSharingan:
                     return mangekyoAbilities;
                 case EyeMaterialState.Rinnegan:
-                    return rinneganAbilties;
+                    return rinneganAbilities;
                 default:
                     return null;
             }
@@ -395,10 +451,21 @@ namespace Jutsu
             return null;
         }
 
-        void ActivateDojustu(List<string> toActivate)
+        Dictionary<string, List<string>> SelectRinneganDojutsu(EyeMaterialState type)
+        {
+            if (type == EyeMaterialState.Rinnegan)
+            {
+                return pathAbilities;
+            }
+
+            return null;
+        }
+
+        public void ActivateDojustu(List<string> toActivate)
         {
             foreach (var skill in toActivate)
             {
+                Debug.Log(skill);
                 if (skill.Contains("Init")) Player.local.creature.container.AddSpellContent(skill);
                 else  Player.local.creature.container.AddSkillContent(skill);
                 activeDojutsuSkills.Add(skill);

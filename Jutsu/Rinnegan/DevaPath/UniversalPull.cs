@@ -7,11 +7,11 @@ using Jutsu.Managed;
 
 namespace Jutsu.Rinnegan.DevaPath
 {
-    public class AlmightyPush : JutsuSkill
+    public class UniversalPull : JutsuSkill
     {
         private SpeechRecognitionEngine _speechRecognizer;
-        private bool activateAlmightyPush;
-        private AudioSource shinraTensei;
+        private bool activateUniversalPull;
+        private AudioSource banshoTenin;
 
         internal override void CustomStartData()
         {
@@ -19,8 +19,8 @@ namespace Jutsu.Rinnegan.DevaPath
             if (_speechRecognizer == null)
             { _speechRecognizer = new SpeechRecognitionEngine();
                 Choices almightyPush = new Choices();
-                almightyPush.Add("Almighty Push");
-                almightyPush.Add("Shinra Tensei");
+                almightyPush.Add("Universal Pull");
+                almightyPush.Add("Bansho Ten'in");
                 Grammar servicesGrammar = new Grammar(new GrammarBuilder(almightyPush));
                 _speechRecognizer.SetInputToDefaultAudioDevice();
                 _speechRecognizer.RequestRecognizerUpdate();
@@ -33,6 +33,7 @@ namespace Jutsu.Rinnegan.DevaPath
                 _speechRecognizer.SpeechRecognized += Recognizer_SpeechRecognized;
             }
         }
+        
         internal override void CustomEndData()
         {
             if(_speechRecognizer != null) _speechRecognizer.SpeechRecognized -= Recognizer_SpeechRecognized;
@@ -43,9 +44,9 @@ namespace Jutsu.Rinnegan.DevaPath
             Debug.Log("Recognized: " + e.Result);
             if (e.Result.Confidence > 0.93f)
             {
-                if (e.Result.Text == "Almighty Push" || e.Result.Text == "Shinra Tensei")
+                if (e.Result.Text == "Universal Pull" || e.Result.Text == "Bansho Ten'in")
                 {
-                    activateAlmightyPush = true;
+                    activateUniversalPull = true;
                 }
             }
         }
@@ -54,18 +55,18 @@ namespace Jutsu.Rinnegan.DevaPath
         {
             while (true)
             {
-                if (activateAlmightyPush)
+                if (activateUniversalPull)
                 {
-                    activateAlmightyPush = false;
-                    if (!shinraTensei)
+                    if (!banshoTenin)
                     {
                         var reference = Object.Instantiate(JutsuEntry.local.shinraTenseiSFX);
-                        shinraTensei = reference.gameObject.GetComponent<AudioSource>();
-                        shinraTensei.transform.position = Player.local.head.transform.position;
-                        shinraTensei.transform.parent = Player.local.head.transform;
+                        banshoTenin = reference.gameObject.GetComponent<AudioSource>();
+                        banshoTenin.transform.position = Player.local.head.transform.position;
+                        banshoTenin.transform.parent = Player.local.head.transform;
                     }
-                    else shinraTensei.Play();
-                    Collider[] colliders = Physics.OverlapSphere(Player.local.creature.transform.position, 6f);
+                    else banshoTenin.Play();
+                    activateUniversalPull = false;
+                    Collider[] colliders = Physics.OverlapSphere(Player.local.creature.transform.position, 10f);
 
                     List<Collider> validColliders = new List<Collider>();
                     foreach (var collider in colliders)
@@ -75,20 +76,20 @@ namespace Jutsu.Rinnegan.DevaPath
                         {
                             validColliders.Add(collider);
                         }
-                        else if (collider.gameObject.GetComponentInParent<Item>() is Item item)
-                        {
-                            if (!Player.local.creature.equipment.GetAllHolsteredItems().Contains(item))
-                            {
-                                validColliders.Add(collider);
-                            }
-                        }
                     }
 
                     foreach (var col in validColliders)
                     {
                         if (col.gameObject.GetComponentInParent<Rigidbody>() is Rigidbody rb)
                         {
-                            var direction = col.transform.position - Player.local.creature.transform.position;
+                            Vector3 target = Player.local.creature.transform.position;
+                            if (Vector3.Distance(Player.local.handRight.transform.position, col.transform.position) <
+                                Vector3.Distance(Player.local.handLeft.transform.position, col.transform.position))
+                            {
+                                target = Player.local.handRight.transform.position;
+                            }
+                            else target = Player.local.handLeft.transform.position;
+                            var direction = target - col.transform.position;
                             var distance = Vector3.Distance(Player.local.creature.transform.position,
                                 col.transform.position);
                             if (rb.GetComponentInParent<Creature>() is Creature creature)
@@ -98,11 +99,11 @@ namespace Jutsu.Rinnegan.DevaPath
                                     creature.ragdoll.SetState(Ragdoll.State.Destabilized);
                                 }
                             }
-                            rb.AddForce(((direction.normalized / (distance * ModOptions._instance._pushModifier))  * 15f) * rb.mass, ForceMode.Impulse);
+                            rb.AddForce(((direction.normalized * (distance * ModOptions._instance._pullModifier))  * 2f) * rb.mass, ForceMode.Impulse);
                         }
                         else if (col.gameObject.GetComponent<Rigidbody>() is Rigidbody rb2)
                         {
-                            var direction = col.transform.position - Player.local.creature.transform.position;
+                            var direction = Player.local.creature.transform.position - col.transform.position;
                             var distance = Vector3.Distance(Player.local.creature.transform.position,
                                 col.transform.position);
                             if (rb2.GetComponentInParent<Creature>() is Creature creature)
@@ -112,7 +113,8 @@ namespace Jutsu.Rinnegan.DevaPath
                                     creature.ragdoll.SetState(Ragdoll.State.Destabilized);
                                 }
                             }
-                            rb2.AddForce(((direction.normalized / (distance * ModOptions._instance._pushModifier))  * 15f) * rb2.mass, ForceMode.Impulse);
+
+                            rb2.AddForce(((direction.normalized * (distance * ModOptions._instance._pullModifier)) * 2f) * rb2.mass, ForceMode.Impulse);
                         }
                     }
                 }
